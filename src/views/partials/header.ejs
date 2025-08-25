@@ -1,69 +1,56 @@
-<header>
-  <div class="navbar bg-base-100 border-b border-base-300">
-    <div class="container mx-auto">
-      <!-- Mobile: menu button -->
-      <div class="flex-none lg:hidden">
-        <div class="dropdown">
-          <button tabindex="0" class="btn btn-ghost" aria-label="Open menu">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
-          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/works">Works</a></li>
-            <li><a href="/contact">Contact</a></li>
-          </ul>
-        </div>
+<header class="navbar bg-base-100 min-h-20 px-4 lg:px-6">
+  <div class="navbar-start">
+    <div class="dropdown">
+      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden" aria-label="Open menu">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
       </div>
-
-      <!-- Brand -->
-      <div class="flex-1">
-        <a href="/" class="btn btn-ghost text-xl font-bold">Leo Atienza</a>
-      </div>
-
-      <!-- Desktop: nav + actions -->
-      <div class="flex-none hidden lg:flex items-center gap-3">
-        <ul class="menu menu-horizontal px-1">
-          <li><a href="/">Home</a></li>
-          <li><a href="/about">About</a></li>
-          <li><a href="/works">Works</a></li>
-        </ul>
-
-        <!-- Contact -->
-        <a href="/contact" class="btn btn-ghost btn-sm">Contact</a>
-
-        <!-- Theme toggle (cupcake ⇄ business) -->
-        <label class="swap swap-rotate" title="Toggle theme">
-          <input id="themeToggle" type="checkbox" aria-label="Toggle theme">
-          <!-- Moon (dark on) -->
-          <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64 13A9 9 0 1 1 11 2.36 7 7 0 1 0 21.64 13z"/></svg>
-          <!-- Sun (light on) -->
-          <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0-14a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1ZM4 13a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2H4Zm15 0a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2h-1Zm-9.78-6.36a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 0 1-1.41 1.41l-.71-.71Zm8.49 8.49a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 1 1-1.41 1.41l-.71-.71Zm0-9.9.71-.71a1 1 0 1 1 1.41 1.41l-.71.71a1 1 0 1 1-1.41-1.41ZM6.93 15.07l.71.71a1 1 0 1 1-1.41 1.41l-.71-.71a1 1 0 0 1 1.41-1.41Z"/>
-          </svg>
-        </label>
-      </div>
+      <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-60 text-base">
+        <li><a href="/projects">Projects</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
     </div>
+    <a href="/" class="btn btn-ghost text-3xl font-bold">Leo Atienza</a>
   </div>
 
-  <!-- Theme persistence -->
-  <script>
-    (function () {
-      const themes = { light: 'cupcake', dark: 'business' };
-      const root = document.documentElement;
-      const toggle = document.getElementById('themeToggle');
-      const saved = localStorage.getItem('theme') || themes.light;
-      root.setAttribute('data-theme', saved);
-      if (toggle) toggle.checked = (saved === themes.dark);
-      if (toggle) {
-        toggle.addEventListener('change', () => {
-          const next = toggle.checked ? themes.dark : themes.light;
-          root.setAttribute('data-theme', next);
-          localStorage.setItem('theme', next);
-        });
-      }
-    })();
-  </script>
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1 text-lg">
+      <li><a href="/projects">Projects</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+  </div>
+
+  <div class="navbar-end">
+    <!-- Theme toggle -->
+    <label class="swap swap-rotate" title="Toggle theme">
+      <input id="themeToggle" type="checkbox" aria-label="Toggle theme">
+      <!-- Moon (dark on) -->
+      <svg class="swap-on fill-current w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M21.64 13A9 9 0 1 1 11 2.36 7 7 0 1 0 21.64 13z"/>
+      </svg>
+      <!-- Sun (light on) -->
+      <svg class="swap-off fill-current w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0-14a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1ZM4 13a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2H4Zm15 0a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2h-1Zm-9.78-6.36a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 0 1-1.41 1.41l-.71-.71Zm8.49 8.49a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 1 1-1.41 1.41l-.71-.71Zm0-9.9.71-.71a1 1 0 1 1 1.41 1.41l-.71.71a1 1 0 1 1-1.41-1.41ZM6.93 15.07l.71.71a1 1 0 1 1-1.41 1.41l-.71-.71a1 1 0 0 1 1.41-1.41Z"/>
+      </svg>
+    </label>
+  </div>
 </header>
+
+<script>
+(function () {
+  const key = 'theme';
+  const checkbox = document.getElementById('themeToggle');
+  const saved = localStorage.getItem(key) || 'cupcake';
+  document.documentElement.setAttribute('data-theme', saved);
+  if (checkbox) checkbox.checked = (saved === 'business');
+
+  checkbox?.addEventListener('change', () => {
+    const next = checkbox.checked ? 'business' : 'cupcake';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(key, next);
+  });
+})();
+</script>

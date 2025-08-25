@@ -1,0 +1,71 @@
+<!doctype html>
+<html data-theme="cupcake">
+<head>
+  <meta charset="utf-8" />
+  <title><%= title %> · Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="description" content="<%= project.summary || 'Project details and links.' %>" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <meta property="og:title" content="<%= project.title %> · Leo Atienza" />
+  <meta property="og:description" content="<%= project.summary || 'Project details and links.' %>" />
+
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container mx-auto px-4 py-10">
+    <article class="max-w-3xl">
+      <header class="mb-6">
+        <h1 class="text-3xl font-bold"><%= project.title %></h1>
+        <% if (project.Category) { %>
+          <div class="mt-2">
+            <span class="badge badge-outline"><%= project.Category.name %></span>
+          </div>
+        <% } %>
+      </header>
+
+      <% if (project.summary) { %>
+        <p class="opacity-80 mb-6"><%= project.summary %></p>
+      <% } %>
+
+      <% if (project.details || project.description) { %>
+        <section class="prose max-w-none mb-8">
+          <%- (project.details || project.description) %>
+        </section>
+      <% } %>
+
+      <% if (project.techStack || project.tools) { %>
+        <section class="mb-6">
+          <h2 class="text-xl font-semibold mb-2">Stack & Tools</h2>
+          <div class="space-x-2">
+            <% if (project.techStack) { %>
+              <% ('' + project.techStack).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
+                <span class="badge badge-outline"><%= s %></span>
+              <% }) %>
+            <% } %>
+            <% if (project.tools) { %>
+              <% ('' + project.tools).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
+                <span class="badge"><%= s %></span>
+              <% }) %>
+            <% } %>
+          </div>
+        </section>
+      <% } %>
+
+      <div class="flex gap-3">
+        <% if (project.liveUrl) { %>
+          <a class="btn btn-primary" href="<%= project.liveUrl %>" target="_blank" rel="noopener noreferrer">Live</a>
+        <% } %>
+        <% if (project.repoUrl) { %>
+          <a class="btn btn-ghost" href="<%= project.repoUrl %>" target="_blank" rel="noopener noreferrer">Repo</a>
+        <% } %>
+      </div>
+    </article>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>
