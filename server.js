@@ -1,88 +1,73 @@
 // server.js — Express app (Vercel-ready, with DB-bypass + /_health)
 require('dotenv').config();
 
-const fs = require('fs');
 const path = require('path');
 const express = require('express');
 
 const app = express();
-const has = (p) => { try { return fs.existsSync(p); } catch { return false; } };
 
-// ----- Views & static (supports /src or root) -----
-const viewsSrc  = path.join(__dirname, 'src', 'views');
-const viewsRoot = path.join(__dirname, 'views');
-const viewsPath = has(viewsSrc) ? viewsSrc : viewsRoot;
+// ---- Paths (your repo uses /src) ----
+const VIEWS_DIR = path.join(__dirname, 'src', 'views');
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
-const publicRoot = path.join(__dirname, 'public');
-const publicSrc  = path.join(__dirname, 'src', 'public');
-const publicPath = has(publicRoot) ? publicRoot : (has(publicSrc) ? publicSrc : null);
+// ---- Routes & DB (your repo uses /src) ----
+const siteRoutes = require('./src/routes/site');
+const { sequelize } = require('./src/config/sequelize'); // Option B you chose
 
+// ---- View engine / static ----
 app.set('view engine', 'ejs');
-app.set('views', viewsPath);
-if (publicPath) app.use(express.static(publicPath));
+app.set('views', VIEWS_DIR);
+app.use(express.static(PUBLIC_DIR));
 
-// ----- Routes (supports /src or root) -----
-let siteRoutes;
-try { siteRoutes = require('./src/routes/site'); }
-catch { siteRoutes = require('./routes/site'); }
-
-// ----- Sequelize (prefer src/config, else root) -----
-let sequelize;
-try { ({ sequelize } = require('./src/config/sequelize')); }
-catch { ({ sequelize } = require('./sequelize')); }
-
-// ----- Quick health route (no DB) -----
+// ---- Health check BEFORE any DB code ----
 app.get('/_health', (req, res) => {
   res.json({
     ok: true,
-    vercel: !!process.env.VERCEL,
     node: process.version,
+    vercel: !!process.env.VERCEL,
     dbBypassed: process.env.DISABLE_DB === '1',
     dbUrlSet: !!process.env.DATABASE_URL,
-    viewsPath,
-    hasViews: has(viewsPath),
-    hasPublic: !!publicPath
+    viewsDir: VIEWS_DIR,
+    publicDir: PUBLIC_DIR
   });
 });
 
-// ----- DB init once per cold start -----
+// ---- Init DB once per cold start ----
 let dbReady;
 async function initDbOnce() {
   if (dbReady) return dbReady;
   dbReady = (async () => {
     await sequelize.authenticate();
-    if (process.env.SYNC_DB === '1') {
-      await sequelize.sync();
-    }
+    if (process.env.SYNC_DB === '1') await sequelize.sync(); // optional
   })();
   return dbReady;
 }
 
-// ----- DB-bypass switch (set DISABLE_DB=1 to skip DB) -----
+// ---- DB-bypass switch (set DISABLE_DB=1 in Vercel to skip DB while debugging) ----
 app.use(async (req, res, next) => {
   if (process.env.DISABLE_DB === '1') return next();
-  try { await initDbOnce(); next(); }
-  catch (e) { next(e); }
+  try {
+    await initDbOnce();
+    next();
+  } catch (e) {
+    console.error('[DB INIT FAILED]', {
+      name: e?.name,
+      message: e?.message,
+      code: e?.original?.code || e?.parent?.code,
+      stack: e?.stack
+    });
+    return res.status(500).send('Database connection failed. Check DATABASE_URL/SSL.');
+  }
 });
 
-// ----- App routes -----
+// ---- App routes ----
 app.use(siteRoutes);
 
-// robots/sitemap (serve from /public if present, else repo root)
-app.get('/robots.txt', (req, res) => {
-  const p1 = publicPath ? path.join(publicPath, 'robots.txt') : null;
-  const p2 = path.join(__dirname, 'robots.txt');
-  const f  = (p1 && has(p1)) ? p1 : p2;
-  return has(f) ? res.sendFile(f) : res.status(404).end();
-});
-app.get('/sitemap.xml', (req, res) => {
-  const p1 = publicPath ? path.join(publicPath, 'sitemap.xml') : null;
-  const p2 = path.join(__dirname, 'sitemap.xml');
-  const f  = (p1 && has(p1)) ? p1 : p2;
-  return has(f) ? res.sendFile(f) : res.status(404).end();
-});
+// ---- robots/sitemap (served from /public if present) ----
+app.get('/robots.txt', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'robots.txt')));
+app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')));
 
-// ----- Fallbacks -----
+// ---- Fallbacks ----
 app.use((req, res) => res.status(404).render('404', { title: 'Not Found' }));
 app.use((err, req, res, next) => {
   console.error('[SERVER ERROR]', err);
@@ -90,7 +75,9 @@ app.use((err, req, res, next) => {
   catch { res.status(500).send('Server Error'); }
 });
 
-// ----- Export for Vercel; listen locally -----
+// ---- Export for Vercel; listen only when run locally ----
 const PORT = process.env.PORT || 3000;
-if (require.main === module) app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
+}
 module.exports = app;

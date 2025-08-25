@@ -8,6 +8,7 @@ if (dbUrl) {
     dialect: 'postgres',
     logging: false,
     dialectOptions: {
+      // Neon on Vercel requires SSL. rejectUnauthorized:false avoids cert chain issues.
       ssl: { require: true, rejectUnauthorized: false }
     }
   });
