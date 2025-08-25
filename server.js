@@ -15,6 +15,10 @@ app.set('views', path.join(__dirname, 'src', 'views'));
 // Static assets
 app.use(express.static(path.join(__dirname, 'public')));
 
+// in server.js (after static middleware)
+app.get('/robots.txt', (_, res) => res.sendFile(path.join(__dirname, 'robots.txt')));
+app.get('/sitemap.xml', (_, res) => res.sendFile(path.join(__dirname, 'sitemap.xml')));
+
 // Body parsers (handy for contact form or small APIs)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

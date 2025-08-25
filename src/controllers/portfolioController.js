@@ -40,3 +40,12 @@ exports.getWorkDetail = async (req, res, next) => {
     res.render('work-show', { title: proj.title, proj });
   } catch (e) { next(e); }
 };
+
+exports.getContact = (req, res) => {
+  const contacts = {
+    email: 'leooatienza@gmail.com',
+    linkedin: process.env.LINKEDIN_URL || null, // set in .env if you have it
+    github: process.env.GITHUB_URL || null      // set in .env if you have it
+  };
+  res.render('contact', { title: 'Contact', contacts });
+};

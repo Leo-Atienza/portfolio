@@ -657,6 +657,72 @@ html {
   --tab-radius: 0.7rem;
 }
 
+[data-theme=cupcake] {
+  color-scheme: light;
+  --in: 72.06% 0.191 231.6;
+  --su: 64.8% 0.150 160;
+  --wa: 84.71% 0.199 83.87;
+  --er: 71.76% 0.221 22.18;
+  --pc: 15.2344% 0.017892 200.026556;
+  --sc: 15.787% 0.020249 356.29965;
+  --ac: 15.8762% 0.029206 78.618794;
+  --nc: 84.7148% 0.013247 313.189598;
+  --inc: 0% 0 0;
+  --suc: 0% 0 0;
+  --wac: 0% 0 0;
+  --erc: 0% 0 0;
+  --rounded-box: 1rem;
+  --rounded-badge: 1.9rem;
+  --animation-btn: 0.25s;
+  --animation-input: .2s;
+  --btn-focus-scale: 0.95;
+  --border-btn: 1px;
+  --p: 76.172% 0.089459 200.026556;
+  --s: 78.9351% 0.101246 356.29965;
+  --a: 79.3811% 0.146032 78.618794;
+  --n: 23.5742% 0.066235 313.189598;
+  --b1: 97.7882% 0.00418 56.375637;
+  --b2: 93.9822% 0.007638 61.449292;
+  --b3: 91.5861% 0.006811 53.440502;
+  --bc: 23.5742% 0.066235 313.189598;
+  --rounded-btn: 1.9rem;
+  --tab-border: 2px;
+  --tab-radius: 0.7rem;
+}
+
+[data-theme=business] {
+  color-scheme: dark;
+  --b2: 22.6487% 0 0;
+  --b3: 20.944% 0 0;
+  --bc: 84.8707% 0 0;
+  --pc: 88.3407% 0.019811 251.473931;
+  --sc: 12.8185% 0.005481 229.389418;
+  --ac: 13.4542% 0.033545 35.791525;
+  --nc: 85.4882% 0.00265 253.041249;
+  --inc: 12.5233% 0.028702 240.033697;
+  --suc: 14.0454% 0.018919 156.59611;
+  --wac: 15.4965% 0.023141 81.519177;
+  --erc: 90.3221% 0.029356 29.674507;
+  --animation-btn: 0.25s;
+  --animation-input: .2s;
+  --btn-focus-scale: 0.95;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
+  --p: 41.7036% 0.099057 251.473931;
+  --s: 64.0924% 0.027405 229.389418;
+  --a: 67.271% 0.167726 35.791525;
+  --n: 27.441% 0.01325 253.041249;
+  --b1: 24.3535% 0 0;
+  --in: 62.6163% 0.143511 240.033697;
+  --su: 70.2268% 0.094594 156.59611;
+  --wa: 77.4824% 0.115704 81.519177;
+  --er: 51.6105% 0.14678 29.674507;
+  --rounded-box: 0.25rem;
+  --rounded-btn: .125rem;
+  --rounded-badge: .125rem;
+}
+
 .container {
   width: 100%;
 }
@@ -2990,6 +3056,18 @@ input.tab:checked + .tab-content,
 
 .filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.hover\:shadow-lg:hover {
+  --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
 @media (min-width: 640px) {
