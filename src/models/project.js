@@ -3,6 +3,21 @@ const { sequelize } = require('../config/sequelize');
 const Category = require('./category');
 const slugify = require('slugify');
 
+function normalizeList(value) {
+  // Accept array or string; output "A, B, C"
+  if (Array.isArray(value)) {
+    return value.map(v => String(v).trim()).filter(Boolean).join(', ');
+  }
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean)
+      .join(', ');
+  }
+  return value ?? ''; // keep nullish as empty string
+}
+
 class Project extends Model {}
 
 Project.init(
@@ -15,7 +30,7 @@ Project.init(
     repoUrl:     { type: DataTypes.STRING },                          // github link
     techStack:   { type: DataTypes.TEXT },                            // comma-separated list
     tools:       { type: DataTypes.TEXT },                            // comma-separated list
-    details:     { type: DataTypes.TEXT }                             // other details / notes (free text)
+    details:     { type: DataTypes.TEXT }                             // other details / notes
   },
   {
     sequelize,
@@ -25,6 +40,10 @@ Project.init(
         if (!project.slug && project.title) {
           project.slug = slugify(project.title, { lower: true, strict: true });
         }
+      },
+      beforeSave(project) {
+        project.techStack = normalizeList(project.techStack);
+        project.tools     = normalizeList(project.tools);
       }
     }
   }

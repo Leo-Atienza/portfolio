@@ -4,3 +4,38 @@
     <p><a class="link link-hover" href="https://mail.google.com/mail/u/0/#inbox?compose=GTvVlcSDbSGpWtmVztGrcCDzCnwQsxhrrHhncmfBSmgfGJdWPtwRFTzspQWJwQXWTQlSfLjsJkZdK">leooatienza@gmail.com</a></p> 
   </aside>
 </footer>
+
+<!-- Enforce off-site link safety: open in new tab + safe rel -->
+<script>
+  (function () {
+    try {
+      var links = document.querySelectorAll('a[href]');
+      var here = window.location;
+      links.forEach(function (a) {
+        var href = a.getAttribute('href') || '';
+        // Skip internal anchors, mailto, tel, javascript, and root-relative/internal links
+        if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+        if (href.startsWith('/')) return;
+
+        // Support protocol-relative (//domain.tld/...) and absolute http(s)
+        var url;
+        try { url = new URL(href, here.href); } catch (e) { return; }
+
+        var isHttp = (url.protocol === 'http:' || url.protocol === 'https:');
+        var isExternal = (url.origin !== here.origin);
+
+        if (isHttp && isExternal) {
+          a.setAttribute('target', '_blank');
+          var existingRel = (a.getAttribute('rel') || '').toLowerCase();
+          var needed = ['noreferrer', 'noopener'];
+          needed.forEach(function (token) {
+            if (!existingRel.includes(token)) existingRel += (existingRel ? ' ' : '') + token;
+          });
+          a.setAttribute('rel', existingRel.trim());
+        }
+      });
+    } catch (e) {
+      // fail-safe: do nothing if DOM API not available
+    }
+  })();
+</script>
