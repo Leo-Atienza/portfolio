@@ -1,5 +1,5 @@
 /*
-# PROJECT
+# PROJECT (example structure for reference only)
 title:
 category:            # e.g., Web, Backend, Data, Mobile (I'll create it if missing)
 repoUrl:             # https://github.com/...
@@ -21,21 +21,21 @@ const Project  = require('./src/models/project');
 
 (async () => {
   try {
-    // Recreate tables to match new schema
+    // Recreate tables to match current schema
     await sequelize.sync({ force: true });
 
-    // Categories
+    // Seed categories
     const web     = await Category.create({ name: 'Web',     slug: 'web' });
     const backend = await Category.create({ name: 'Backend', slug: 'backend' });
 
-    // Helper strings (comma-separated lists)
+    // Common strings
     const stack1 = 'Node.js, Express, EJS, Postgres, TailwindCSS, daisyUI';
     const tools1 = 'VS Code, Git, Render, Neon';
 
     await Project.create({
       title: 'Dine-In Digital',
       summary: 'Restaurant ordering system with clean routing and EJS templating.',
-      description: 'Semester project refactored as read-only portfolio. Focus on MVC structure, route design, and DB relations.',
+      description: 'Semester project refactored as a read-only portfolio sample. Focus on MVC structure, route design, and DB relations.',
       liveUrl: 'https://example-dinein.vercel.app',
       repoUrl: 'https://github.com/yourname/dine-in-digital',
       techStack: stack1,

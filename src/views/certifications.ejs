@@ -1,0 +1,40 @@
+<!doctype html>
+<html data-theme="cupcake">
+<head>
+  <meta charset="utf-8" />
+  <title><%= title %> · Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Professional certifications." />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold mb-6">Certifications</h1>
+
+    <% if (certs && certs.length) { %>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <% certs.forEach(c => { %>
+          <div class="card bg-base-100 shadow-md">
+            <div class="card-body">
+              <h2 class="card-title"><%= c.name %></h2>
+              <p class="opacity-80"><%= [c.issuer, c.date].filter(Boolean).join(' · ') %></p>
+              <% if (c.url) { %>
+                <div class="card-actions mt-2">
+                  <a class="btn btn-ghost btn-sm" href="<%= c.url %>" target="_blank" rel="noopener noreferrer">Verify</a>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="opacity-70">No certifications yet. Add them in <code>portfolioController.getCertifications()</code>.</p>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

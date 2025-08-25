@@ -27,7 +27,6 @@ exports.getWorks = async (req, res) => {
     let where = {};
 
     if (categoryParam) {
-      // Allow filter by slug OR numeric id
       const cat = await Category.findOne({
         where: {
           [Op.or]: [
@@ -83,4 +82,23 @@ exports.getContact = (req, res) => {
     github: process.env.GITHUB_URL || null,
   };
   res.render('contact', { title: 'Contact', contacts });
+};
+
+// ===== NEW PAGES =====
+// Keep arrays empty by default (so we don't invent data).
+// You can populate these arrays later.
+
+exports.getEducation = (req, res) => {
+  const schools = []; // [{ school, program, location, start, end, details:[] }]
+  res.render('education', { title: 'Education', schools });
+};
+
+exports.getCertifications = (req, res) => {
+  const certs = []; // [{ name, issuer, date, url }]
+  res.render('certifications', { title: 'Certifications', certs });
+};
+
+exports.getExperience = (req, res) => {
+  const roles = []; // [{ title, company, location, start, end, bullets:[] }]
+  res.render('experience', { title: 'Experience', roles });
 };

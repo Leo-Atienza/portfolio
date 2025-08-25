@@ -1,7 +1,9 @@
 <footer class="footer footer-center bg-base-200 text-base-content p-6 border-t border-base-300">
   <aside>
     <p>© <%= new Date().getFullYear() %> Leo Atienza — Built with Express, EJS, Tailwind, daisyUI & Sequelize.</p>
-    <p><a class="link link-hover" href="https://mail.google.com/mail/u/0/#inbox?compose=GTvVlcSDbSGpWtmVztGrcCDzCnwQsxhrrHhncmfBSmgfGJdWPtwRFTzspQWJwQXWTQlSfLjsJkZdK">leooatienza@gmail.com</a></p> 
+    <p>
+      <a class="link link-hover" href="mailto:leooatienza@gmail.com">leooatienza@gmail.com</a>
+    </p>
   </aside>
 </footer>
 
@@ -13,29 +15,28 @@
       var here = window.location;
       links.forEach(function (a) {
         var href = a.getAttribute('href') || '';
+
         // Skip internal anchors, mailto, tel, javascript, and root-relative/internal links
-        if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
-        if (href.startsWith('/')) return;
+        if (
+          href.startsWith('#') ||
+          href.startsWith('mailto:') ||
+          href.startsWith('tel:') ||
+          href.startsWith('javascript:') ||
+          href.startsWith('/') ||
+          href.startsWith(here.origin)
+        ) return;
 
-        // Support protocol-relative (//domain.tld/...) and absolute http(s)
-        var url;
-        try { url = new URL(href, here.href); } catch (e) { return; }
-
-        var isHttp = (url.protocol === 'http:' || url.protocol === 'https:');
-        var isExternal = (url.origin !== here.origin);
-
-        if (isHttp && isExternal) {
-          a.setAttribute('target', '_blank');
-          var existingRel = (a.getAttribute('rel') || '').toLowerCase();
-          var needed = ['noreferrer', 'noopener'];
-          needed.forEach(function (token) {
-            if (!existingRel.includes(token)) existingRel += (existingRel ? ' ' : '') + token;
-          });
-          a.setAttribute('rel', existingRel.trim());
-        }
+        // External: open safely in new tab
+        a.setAttribute('target', '_blank');
+        var existingRel = (a.getAttribute('rel') || '').toLowerCase();
+        var needed = ['noreferrer', 'noopener'];
+        needed.forEach(function (token) {
+          if (!existingRel.includes(token)) existingRel += (existingRel ? ' ' : '') + token;
+        });
+        a.setAttribute('rel', existingRel.trim());
       });
     } catch (e) {
-      // fail-safe: do nothing if DOM API not available
+      // no-op
     }
   })();
 </script>

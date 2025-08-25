@@ -1,52 +1,86 @@
-// server.js — starts the app only after the DB connects
-
+// server.js — Express app (Vercel-ready)
 require('dotenv').config();
+
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const siteRoutes = require('./src/routes/site');
-const { sequelize } = require('./src/config/sequelize');
 
 const app = express();
 
-// View engine
+// ---------- helpers ----------
+const has = (p) => fs.existsSync(p);
+
+// Resolve views dir (supports /src/views or /views)
+const viewsSrc  = path.join(__dirname, 'src', 'views');
+const viewsRoot = path.join(__dirname, 'views');
+const viewsPath = has(viewsSrc) ? viewsSrc : viewsRoot;
+
+// Resolve public dir (supports /public or /src/public)
+const publicRoot = path.join(__dirname, 'public');
+const publicSrc  = path.join(__dirname, 'src', 'public');
+const publicPath = has(publicRoot) ? publicRoot : (has(publicSrc) ? publicSrc : null);
+
+// Try to load routes from /src or root
+let siteRoutes;
+try { siteRoutes = require('./src/routes/site'); }
+catch { siteRoutes = require('./routes/site'); }
+
+// Try to load Sequelize config from /src or root
+let sequelize;
+try { ({ sequelize } = require('./src/config/sequelize')); }
+catch { ({ sequelize } = require('./sequelize')); }
+
+// ---------- views / static ----------
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'src', 'views'));
+app.set('views', viewsPath);
+if (publicPath) app.use(express.static(publicPath));
 
-// Static assets
-app.use(express.static(path.join(__dirname, 'public')));
+// ---------- DB init (once per cold start) ----------
+let dbReady;
+async function initDbOnce() {
+  if (dbReady) return dbReady;
+  dbReady = (async () => {
+    await sequelize.authenticate();            // confirm credentials & SSL
+    if (process.env.SYNC_DB === '1') {
+      await sequelize.sync();                  // optional schema sync
+    }
+  })();
+  return dbReady;
+}
 
-// in server.js (after static middleware)
-app.get('/robots.txt', (_, res) => res.sendFile(path.join(__dirname, 'robots.txt')));
-app.get('/sitemap.xml', (_, res) => res.sendFile(path.join(__dirname, 'sitemap.xml')));
-
-// Body parsers (handy for contact form or small APIs)
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-// Routes
-app.use('/', siteRoutes);
-
-// 404 (keep after routes)
-app.use((req, res) => {
-  res.status(404).render('404', { title: 'Not Found' });
+// Ensure DB is ready before any route
+app.use(async (req, res, next) => {
+  try { await initDbOnce(); next(); }
+  catch (e) { next(e); }
 });
 
-// 500 error handler (must have 4 params)
+// ---------- routes ----------
+app.use(siteRoutes);
+
+// robots.txt / sitemap.xml (serve from /public if present, else repo root)
+app.get('/robots.txt', (req, res) => {
+  const p1 = publicPath ? path.join(publicPath, 'robots.txt') : null;
+  const p2 = path.join(__dirname, 'robots.txt');
+  const f  = (p1 && has(p1)) ? p1 : p2;
+  return has(f) ? res.sendFile(f) : res.status(404).end();
+});
+app.get('/sitemap.xml', (req, res) => {
+  const p1 = publicPath ? path.join(publicPath, 'sitemap.xml') : null;
+  const p2 = path.join(__dirname, 'sitemap.xml');
+  const f  = (p1 && has(p1)) ? p1 : p2;
+  return has(f) ? res.sendFile(f) : res.status(404).end();
+});
+
+// ---------- fallbacks ----------
+app.use((req, res) => res.status(404).render('404', { title: 'Not Found' }));
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error('[SERVER ERROR]', err);
   res.status(500).render('500', { title: 'Server Error' });
 });
 
-// Boot only after DB connects
+// ---------- export for Vercel; listen locally ----------
 const PORT = process.env.PORT || 3000;
-
-(async () => {
-  try {
-    await sequelize.authenticate();
-    await sequelize.sync(); // creates tables if missing
-    app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
-  } catch (e) {
-    console.error('DB connection failed:', e);
-    process.exit(1);
-  }
-})();
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
+}
+module.exports = app;

@@ -17,4 +17,9 @@ router.get('/projects', ctl.getWorks);            // list
 router.get('/project/:slug', ctl.getWorkDetail);  // detail
 router.get('/contact', ctl.getContact);
 
+// NEW pages
+router.get('/education', ctl.getEducation);
+router.get('/certifications', ctl.getCertifications);
+router.get('/experience', ctl.getExperience);
+
 module.exports = router;
