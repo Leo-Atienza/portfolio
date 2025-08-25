@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
-const { Category, Project } = require('../models');
+const Category = require('../models/category');
+const Project  = require('../models/project');
 
 exports.getHome = async (req, res) => {
   try {
@@ -9,8 +10,8 @@ exports.getHome = async (req, res) => {
       include: [{ model: Category }],
     });
     res.render('index', { title: 'Home', recent });
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error(e);
     res.status(500).render('500', { title: 'Server Error' });
   }
 };
@@ -23,17 +24,11 @@ exports.getWorks = async (req, res) => {
   try {
     const categories = await Category.findAll({ order: [['name', 'ASC']] });
 
-    const categoryParam = (req.query.category || '').trim();
-    let where = {};
-
-    if (categoryParam) {
+    const selected = (req.query.category || '').trim();
+    const where = {};
+    if (selected) {
       const cat = await Category.findOne({
-        where: {
-          [Op.or]: [
-            { slug: categoryParam },
-            { id: Number(categoryParam) || 0 },
-          ],
-        },
+        where: { [Op.or]: [{ slug: selected }, { id: Number(selected) || 0 }] },
       });
       if (cat) where.categoryId = cat.id;
     }
@@ -44,33 +39,23 @@ exports.getWorks = async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
-    res.render('projects', {
-      title: 'Projects',
-      categories,
-      projects,
-      selected: categoryParam,
-    });
-  } catch (err) {
-    console.error(err);
+    res.render('projects', { title: 'Projects', categories, projects, selected });
+  } catch (e) {
+    console.error(e);
     res.status(500).render('500', { title: 'Server Error' });
   }
 };
 
 exports.getWorkDetail = async (req, res) => {
   try {
-    const { slug } = req.params;
     const project = await Project.findOne({
-      where: { slug },
+      where: { slug: req.params.slug },
       include: [{ model: Category }],
     });
-
-    if (!project) {
-      return res.status(404).render('404', { title: 'Not Found' });
-    }
-
+    if (!project) return res.status(404).render('404', { title: 'Not Found' });
     res.render('project-show', { title: project.title, project });
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error(e);
     res.status(500).render('500', { title: 'Server Error' });
   }
 };
@@ -84,21 +69,7 @@ exports.getContact = (req, res) => {
   res.render('contact', { title: 'Contact', contacts });
 };
 
-// ===== NEW PAGES =====
-// Keep arrays empty by default (so we don't invent data).
-// You can populate these arrays later.
-
-exports.getEducation = (req, res) => {
-  const schools = []; // [{ school, program, location, start, end, details:[] }]
-  res.render('education', { title: 'Education', schools });
-};
-
-exports.getCertifications = (req, res) => {
-  const certs = []; // [{ name, issuer, date, url }]
-  res.render('certifications', { title: 'Certifications', certs });
-};
-
-exports.getExperience = (req, res) => {
-  const roles = []; // [{ title, company, location, start, end, bullets:[] }]
-  res.render('experience', { title: 'Experience', roles });
-};
+// New pages (empty arrays you can fill later)
+exports.getEducation = (req, res) => res.render('education', { title: 'Education', schools: [] });
+exports.getCertifications = (req, res) => res.render('certifications', { title: 'Certifications', certs: [] });
+exports.getExperience = (req, res) => res.render('experience', { title: 'Experience', roles: [] });

@@ -3122,6 +3122,10 @@ input.tab:checked + .tab-content,
 
 /* any custom styles */
 
+.fixed {
+  position: fixed;
+}
+
 .z-\[1\] {
   z-index: 1;
 }

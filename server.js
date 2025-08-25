@@ -10,16 +10,12 @@ const app = express();
 const VIEWS_DIR = path.join(__dirname, 'src', 'views');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
-// ---- Routes & DB (your repo uses /src) ----
-const siteRoutes = require('./src/routes/site');
-const { sequelize } = require('./src/config/sequelize'); // Option B you chose
-
 // ---- View engine / static ----
 app.set('view engine', 'ejs');
 app.set('views', VIEWS_DIR);
 app.use(express.static(PUBLIC_DIR));
 
-// ---- Health check BEFORE any DB code ----
+// ---- Health check BEFORE any DB/routes (so it works even if something else fails) ----
 app.get('/_health', (req, res) => {
   res.json({
     ok: true,
@@ -32,7 +28,9 @@ app.get('/_health', (req, res) => {
   });
 });
 
-// ---- Init DB once per cold start ----
+// ---- DB (Sequelize) ----
+const { sequelize } = require('./src/config/sequelize');
+
 let dbReady;
 async function initDbOnce() {
   if (dbReady) return dbReady;
@@ -43,27 +41,23 @@ async function initDbOnce() {
   return dbReady;
 }
 
-// ---- DB-bypass switch (set DISABLE_DB=1 in Vercel to skip DB while debugging) ----
+// DB-bypass switch (set DISABLE_DB=1 in Vercel to skip DB while debugging)
 app.use(async (req, res, next) => {
   if (process.env.DISABLE_DB === '1') return next();
   try {
     await initDbOnce();
     next();
   } catch (e) {
-    console.error('[DB INIT FAILED]', {
-      name: e?.name,
-      message: e?.message,
-      code: e?.original?.code || e?.parent?.code,
-      stack: e?.stack
-    });
+    console.error('[DB INIT FAILED]', e?.message || e);
     return res.status(500).send('Database connection failed. Check DATABASE_URL/SSL.');
   }
 });
 
-// ---- App routes ----
+// ---- Routes (your repo uses /src) ----
+const siteRoutes = require('./src/routes/site');
 app.use(siteRoutes);
 
-// ---- robots/sitemap (served from /public if present) ----
+// ---- robots/sitemap (served from /public) ----
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'robots.txt')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')));
 

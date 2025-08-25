@@ -11,13 +11,14 @@ router.get('/work/:slug', (req, res) => {
   res.redirect(301, '/project/' + encodeURIComponent(req.params.slug));
 });
 
+// Core pages
 router.get('/', ctl.getHome);
 router.get('/about', ctl.getAbout);
 router.get('/projects', ctl.getWorks);            // list
 router.get('/project/:slug', ctl.getWorkDetail);  // detail
 router.get('/contact', ctl.getContact);
 
-// NEW pages
+// New pages
 router.get('/education', ctl.getEducation);
 router.get('/certifications', ctl.getCertifications);
 router.get('/experience', ctl.getExperience);
