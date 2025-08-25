@@ -8,7 +8,7 @@ if (dbUrl) {
     dialect: 'postgres',
     logging: false,
     dialectOptions: {
-      ssl: { require: true, rejectUnauthorized: false } // <- rejectUnauthorized:false helps on some hosts
+      ssl: { require: true, rejectUnauthorized: false }
     }
   });
 } else {
