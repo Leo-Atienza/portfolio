@@ -1,0 +1,78 @@
+<!doctype html>
+<html data-theme="cupcake">
+<head>
+  <meta charset="utf-8" />
+  <title><%= title %> · Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <% const _desc = ((proj.summary || proj.description || '').replace(/"/g,'&quot;')).slice(0,155); %>
+  <meta name="description" content="<%= _desc %>" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="<%= proj.title %> · Leo Atienza" />
+  <meta property="og:description" content="<%= _desc %>" />
+  <!-- <meta property="og:image" content="/images/og-cover.jpg" /> -->
+
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container mx-auto px-4 py-10">
+    <article class="max-w-3xl space-y-6">
+      <header>
+        <h1 class="text-3xl font-extrabold"><%= proj.title %></h1>
+        <p class="text-sm opacity-70"><%= proj.Category ? proj.Category.name : "General" %></p>
+      </header>
+
+      <section>
+        <h2 class="text-xl font-semibold mb-2">Summary</h2>
+        <p><%= proj.summary %></p>
+      </section>
+
+      <% const tech = (proj.techStack || '').split(',').map(s=>s.trim()).filter(Boolean); %>
+      <% const toolList = (proj.tools || '').split(',').map(s=>s.trim()).filter(Boolean); %>
+
+      <% if (tech.length) { %>
+        <section>
+          <h2 class="text-xl font-semibold mb-2">Tech stack</h2>
+          <div class="flex flex-wrap gap-2">
+            <% tech.forEach(t => { %><span class="badge badge-neutral"><%= t %></span><% }) %>
+          </div>
+        </section>
+      <% } %>
+
+      <% if (toolList.length) { %>
+        <section>
+          <h2 class="text-xl font-semibold mb-2">Tools</h2>
+          <div class="flex flex-wrap gap-2">
+            <% toolList.forEach(t => { %><span class="badge badge-outline"><%= t %></span><% }) %>
+          </div>
+        </section>
+      <% } %>
+
+      <% if (proj.details) { %>
+        <section>
+          <h2 class="text-xl font-semibold mb-2">Other details</h2>
+          <div class="space-y-2"><%- proj.details.replace(/\n/g, '<br>') %></div>
+        </section>
+      <% } %>
+
+      <% if (proj.description) { %>
+        <section>
+          <h2 class="text-xl font-semibold mb-2">Description</h2>
+          <div class="space-y-2"><%- proj.description.replace(/\n/g, '<br>') %></div>
+        </section>
+      <% } %>
+
+      <footer class="flex gap-3">
+        <% if (proj.liveUrl) { %><a class="btn btn-primary" href="<%= proj.liveUrl %>" target="_blank" rel="noreferrer noopener">Live</a><% } %>
+        <% if (proj.repoUrl) { %><a class="btn btn-ghost" href="<%= proj.repoUrl %>" target="_blank" rel="noreferrer noopener">Repo</a><% } %>
+      </footer>
+    </article>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

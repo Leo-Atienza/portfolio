@@ -1,0 +1,69 @@
+<!doctype html>
+<html data-theme="cupcake">
+<head>
+  <meta charset="utf-8" />
+  <title><%= title %> · Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Basic SEO -->
+  <meta name="description" content="Browse Leo Atienza’s projects by category. Each entry includes repo, live demo, summary, tech stack, tools, and details." />
+  <link rel="icon" href="/favicon.ico" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="Projects · Leo Atienza" />
+  <meta property="og:description" content="Projects with summaries, tech stacks, tools, and links to GitHub and live demos." />
+  <!-- <meta property="og:image" content="/images/og-cover.jpg" /> -->
+
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold mb-6">Works</h1>
+
+    <form method="get" action="/works" class="mb-6">
+      <label class="label"><span class="label-text">Filter by category</span></label>
+      <select name="category" class="select select-bordered w-full max-w-xs" onchange="this.form.submit()">
+        <option value="">All</option>
+        <% (categories||[]).forEach(c => { %>
+          <option value="<%= c.id %>" <%= selected == String(c.id) ? 'selected' : '' %>><%= c.name %></option>
+        <% }) %>
+      </select>
+    </form>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <% (projects||[]).forEach(p => { %>
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body">
+            <h3 class="card-title"><a href="/work/<%= p.slug %>"><%= p.title %></a></h3>
+            <p class="text-sm opacity-70"><%= p.Category ? p.Category.name : "General" %></p>
+            <p><%= p.summary %></p>
+
+            <% const tech = (p.techStack || '').split(',').map(s=>s.trim()).filter(Boolean); %>
+            <% const toolList = (p.tools || '').split(',').map(s=>s.trim()).filter(Boolean); %>
+
+            <% if (tech.length) { %>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <% tech.forEach(t => { %><span class="badge badge-neutral"><%= t %></span><% }) %>
+              </div>
+            <% } %>
+            <% if (toolList.length) { %>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <% toolList.forEach(t => { %><span class="badge badge-outline"><%= t %></span><% }) %>
+              </div>
+            <% } %>
+
+            <div class="card-actions justify-start mt-3">
+              <% if (p.liveUrl) { %><a class="btn btn-primary btn-sm" href="<%= p.liveUrl %>" target="_blank" rel="noreferrer noopener">Live</a><% } %>
+              <% if (p.repoUrl) { %><a class="btn btn-ghost btn-sm" href="<%= p.repoUrl %>" target="_blank" rel="noreferrer noopener">Repo</a><% } %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

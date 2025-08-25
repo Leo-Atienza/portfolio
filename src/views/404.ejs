@@ -1,0 +1,26 @@
+<!doctype html>
+<html data-theme="cupcake">
+<head>
+  <meta charset="utf-8" />
+  <title><%= title %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="description" content="Page not found — try the home page or see recent projects." />
+  <link rel="icon" href="/favicon.ico" />
+
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container mx-auto px-4 py-24">
+    <div class="text-center">
+      <h1 class="text-4xl font-bold mb-2"><%= title %></h1>
+      <p class="opacity-70">Please check the URL or go back home.</p>
+      <a class="btn btn-primary mt-6" href="/">Back home</a>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html data-theme="cupcake">
+<head>
+  <meta charset="utf-8" />
+  <title><%= title %> · Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Basic SEO -->
+  <meta name="description" content="Leo Atienza — portfolio of full-stack projects built with Node.js, Express, EJS, and Postgres. See recent work, tech stack, and write-ups." />
+  <link rel="icon" href="/favicon.ico" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="Leo Atienza · Portfolio" />
+  <meta property="og:description" content="Full-stack projects, case studies, and links to code and live demos." />
+  <!-- <meta property="og:image" content="/images/og-cover.jpg" /> -->
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container mx-auto px-4 py-10">
+    <section class="hero min-h-[40vh] bg-base-200 rounded-2xl">
+      <div class="hero-content text-center">
+        <div class="max-w-2xl">
+          <h1 class="text-4xl font-extrabold">Hi, I'm Leo 👋</h1>
+          <p class="py-4 opacity-80">Student developer building full-stack apps with Node, EJS, and Postgres.</p>
+          <div class="flex gap-3 justify-center">
+            <a class="btn btn-primary" href="/works">See my work</a>
+            <a class="btn btn-outline" href="/about">About me</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <% if (typeof recent !== 'undefined' && Array.isArray(recent) && recent.length) { %>
+      <section class="mt-10">
+        <h2 class="text-2xl font-semibold mb-4">Recent Projects</h2>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <% recent.forEach(p => { %>
+            <div class="card bg-base-100 shadow-md">
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a href="/work/<%= p.slug %>"><%= p.title %></a>
+                </h3>
+                <p class="text-sm opacity-70"><%= p.Category ? p.Category.name : "General" %></p>
+                <p><%= p.summary %></p>
+
+                <% const tech = (p.techStack || '').split(',').map(s=>s.trim()).filter(Boolean); %>
+                <% if (tech.length) { %>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    <% tech.forEach(t => { %><span class="badge badge-neutral"><%= t %></span><% }) %>
+                  </div>
+                <% } %>
+
+                <div class="card-actions justify-start mt-3">
+                  <% if (p.liveUrl) { %><a class="btn btn-primary btn-sm" href="<%= p.liveUrl %>" target="_blank" rel="noreferrer noopener">Live</a><% } %>
+                  <% if (p.repoUrl) { %><a class="btn btn-ghost btn-sm" href="<%= p.repoUrl %>" target="_blank" rel="noreferrer noopener">Repo</a><% } %>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

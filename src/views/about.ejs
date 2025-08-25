@@ -1,0 +1,32 @@
+<!doctype html>
+<html data-theme="cupcake">
+<head>
+  <meta charset="utf-8" />
+  <title><%= title %> · Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Basic SEO -->
+  <meta name="description" content="About Leo Atienza — Computer Programming & Analysis student focused on Node.js, Express, EJS, Postgres, and clean MVC patterns." />
+  <link rel="icon" href="/favicon.ico" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="About · Leo Atienza" />
+  <meta property="og:description" content="Background, interests, and the tech I use to build full-stack apps." />
+  <!-- <meta property="og:image" content="/images/og-cover.jpg" /> -->
+
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container mx-auto px-4 py-10">
+    <section class="max-w-3xl">
+      <h1 class="text-3xl font-bold mb-4">About</h1>
+      <p class="mb-3">I’m a Computer Programming &amp; Analysis student at Seneca, focusing on full-stack web development with Node.js, Express, EJS, and Postgres/Sequelize.</p>
+      <p class="mb-3">This portfolio is a read-only site powered by an Express server, EJS views, and a Neon Postgres database.</p>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>
