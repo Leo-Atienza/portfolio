@@ -6,63 +6,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Basic SEO -->
-  <meta name="description" content="Leo Atienza — portfolio of full-stack projects using Node/Express, EJS, Tailwind/daisyUI, and Postgres. See recent work, tech stack, and write-ups." />
+  <meta name="description" content="Leo Atienza — portfolio of full-stack projects built with Node.js, Express, EJS, and Postgres. See recent work, tech stack, and write-ups." />
   <link rel="icon" href="/favicon.ico" />
 
   <!-- Open Graph / Twitter -->
   <meta property="og:title" content="Leo Atienza · Portfolio" />
   <meta property="og:description" content="Full-stack projects, case studies, and links to code and live demos." />
+  <!-- <meta property="og:image" content="/images/og-cover.jpg" /> -->
 
   <!-- Styles -->
-  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/main.css?v=<%= assetVersion %>" />
 </head>
 <body>
   <%- include('partials/header') %>
 
-  <main class="container mx-auto px-4">
-    <!-- Hero centered in the middle -->
-    <section class="min-h-[60vh] grid place-items-center text-center">
-      <div class="max-w-3xl py-10">
-        <h1 class="text-5xl font-bold mb-4">Hi, I’m Leo 👋</h1>
-        <p class="opacity-80 mb-8 text-lg">
-          Full-stack developer building with Node/Express, EJS, Tailwind/daisyUI, and Postgres.
-        </p>
-        <div class="flex flex-wrap gap-4 justify-center">
-          <a class="btn btn-primary btn-lg" href="/projects">Projects</a>
-          <a class="btn btn-ghost btn-lg" href="/about">About</a>
+  <main class="container mx-auto px-4 py-10">
+    <section class="hero min-h-[40vh] bg-base-200 rounded-2xl">
+      <div class="hero-content text-center">
+        <div class="max-w-2xl">
+          <h1 class="text-4xl font-extrabold">Hi, I'm Leo 👋</h1>
+          <p class="py-4 opacity-80">An IT student aspiring to tackle both IT Service Management and Software Engineering.</p>
+          <div class="flex gap-3 justify-center">
+            <a class="btn btn-primary" href="/works">Projects</a>
+            <a class="btn btn-outline" href="/about">About me</a>
+          </div>
         </div>
       </div>
     </section>
 
-    <% if (typeof recent !== 'undefined' && recent && recent.length) { %>
-      <section class="px-0 py-10">
-        <h2 class="text-3xl font-semibold mb-4">Recent</h2>
-
+    <% if (typeof recent !== 'undefined' && Array.isArray(recent) && recent.length) { %>
+      <section class="mt-10">
+        <h2 class="text-2xl font-semibold mb-4">Recent Projects</h2>
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <% recent.forEach(p => { %>
-            <div class="card bg-base-100 shadow-md hover:shadow-lg transition">
+            <div class="card bg-base-100 shadow-md">
               <div class="card-body">
                 <h3 class="card-title">
-                  <a href="/project/<%= p.slug %>"><%= p.title %></a>
+                  <a href="/work/<%= p.slug %>"><%= p.title %></a>
                 </h3>
-                <% if (p.summary) { %>
-                  <p class="opacity-80"><%= p.summary %></p>
-                <% } %>
+                <p class="text-sm opacity-70"><%= p.Category ? p.Category.name : "General" %></p>
+                <p><%= p.summary %></p>
 
-                <% if (p.techStack || p.tools) { %>
-                  <div class="mt-2 space-x-2">
-                    <% if (p.techStack) { %>
-                      <% ('' + p.techStack).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
-                        <span class="badge badge-outline"><%= s %></span>
-                      <% }) %>
-                    <% } %>
-                    <% if (p.tools) { %>
-                      <% ('' + p.tools).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
-                        <span class="badge"><%= s %></span>
-                      <% }) %>
-                    <% } %>
+                <% const tech = (p.techStack || '').split(',').map(s=>s.trim()).filter(Boolean); %>
+                <% if (tech.length) { %>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    <% tech.forEach(t => { %><span class="badge badge-neutral"><%= t %></span><% }) %>
                   </div>
                 <% } %>
+
+                <div class="card-actions justify-start mt-3">
+                  <% if (p.liveUrl) { %><a class="btn btn-primary btn-sm" href="<%= p.liveUrl %>" target="_blank" rel="noreferrer noopener">Live</a><% } %>
+                  <% if (p.repoUrl) { %><a class="btn btn-ghost btn-sm" href="<%= p.repoUrl %>" target="_blank" rel="noreferrer noopener">Repo</a><% } %>
+                </div>
               </div>
             </div>
           <% }) %>
