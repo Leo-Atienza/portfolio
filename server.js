@@ -1,4 +1,4 @@
-// server.js — Express app (Vercel-ready, with /_health)
+// server.js — Express app (Vercel-ready, with DB-bypass + /_health)
 require('dotenv').config();
 
 const fs = require('fs');
@@ -8,7 +8,7 @@ const express = require('express');
 const app = express();
 const has = (p) => { try { return fs.existsSync(p); } catch { return false; } };
 
-// Views & static (supports /src or root)
+// ----- Views & static (supports /src or root) -----
 const viewsSrc  = path.join(__dirname, 'src', 'views');
 const viewsRoot = path.join(__dirname, 'views');
 const viewsPath = has(viewsSrc) ? viewsSrc : viewsRoot;
@@ -17,26 +17,27 @@ const publicRoot = path.join(__dirname, 'public');
 const publicSrc  = path.join(__dirname, 'src', 'public');
 const publicPath = has(publicRoot) ? publicRoot : (has(publicSrc) ? publicSrc : null);
 
-// Routes (supports /src or root)
-let siteRoutes;
-try { siteRoutes = require('./src/routes/site'); }
-catch { siteRoutes = require('./routes/site'); }
-
-// Sequelize config (try src first per your “option B”, then root fallback)
-let sequelize;
-try { ({ sequelize } = require('./src/config/sequelize')); }
-catch { ({ sequelize } = require('./sequelize')); }
-
 app.set('view engine', 'ejs');
 app.set('views', viewsPath);
 if (publicPath) app.use(express.static(publicPath));
 
-// Health check (no DB needed) — hit /_health on Vercel to confirm boot
+// ----- Routes (supports /src or root) -----
+let siteRoutes;
+try { siteRoutes = require('./src/routes/site'); }
+catch { siteRoutes = require('./routes/site'); }
+
+// ----- Sequelize (prefer src/config, else root) -----
+let sequelize;
+try { ({ sequelize } = require('./src/config/sequelize')); }
+catch { ({ sequelize } = require('./sequelize')); }
+
+// ----- Quick health route (no DB) -----
 app.get('/_health', (req, res) => {
   res.json({
     ok: true,
     vercel: !!process.env.VERCEL,
     node: process.version,
+    dbBypassed: process.env.DISABLE_DB === '1',
     dbUrlSet: !!process.env.DATABASE_URL,
     viewsPath,
     hasViews: has(viewsPath),
@@ -44,24 +45,27 @@ app.get('/_health', (req, res) => {
   });
 });
 
-// DB init once per cold start
+// ----- DB init once per cold start -----
 let dbReady;
 async function initDbOnce() {
   if (dbReady) return dbReady;
   dbReady = (async () => {
     await sequelize.authenticate();
-    if (process.env.SYNC_DB === '1') await sequelize.sync();
+    if (process.env.SYNC_DB === '1') {
+      await sequelize.sync();
+    }
   })();
   return dbReady;
 }
 
-// Ensure DB ready before handling app routes
+// ----- DB-bypass switch (set DISABLE_DB=1 to skip DB) -----
 app.use(async (req, res, next) => {
+  if (process.env.DISABLE_DB === '1') return next();
   try { await initDbOnce(); next(); }
   catch (e) { next(e); }
 });
 
-// App routes
+// ----- App routes -----
 app.use(siteRoutes);
 
 // robots/sitemap (serve from /public if present, else repo root)
@@ -78,7 +82,7 @@ app.get('/sitemap.xml', (req, res) => {
   return has(f) ? res.sendFile(f) : res.status(404).end();
 });
 
-// Fallbacks
+// ----- Fallbacks -----
 app.use((req, res) => res.status(404).render('404', { title: 'Not Found' }));
 app.use((err, req, res, next) => {
   console.error('[SERVER ERROR]', err);
@@ -86,7 +90,7 @@ app.use((err, req, res, next) => {
   catch { res.status(500).send('Server Error'); }
 });
 
-// Export for Vercel; listen only locally
+// ----- Export for Vercel; listen locally -----
 const PORT = process.env.PORT || 3000;
 if (require.main === module) app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
 module.exports = app;
