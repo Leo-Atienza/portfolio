@@ -1,6 +1,5 @@
 const { Op } = require('sequelize');
-const Category = require('../models/category');
-const Project  = require('../models/project');
+const { Category, Project } = require('../models');
 
 exports.getHome = async (req, res) => {
   try {

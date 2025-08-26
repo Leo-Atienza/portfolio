@@ -27,7 +27,7 @@
           <h1 class="text-4xl font-extrabold">Hi, I'm Leo 👋</h1>
           <p class="py-4 opacity-80">An IT student aspiring to tackle both IT Service Management and Software Engineering.</p>
           <div class="flex gap-3 justify-center">
-            <a class="btn btn-primary" href="/works">Projects</a>
+            <a class="btn btn-primary" href="/projects">Projects</a>
             <a class="btn btn-outline" href="/about">About me</a>
           </div>
         </div>
@@ -42,7 +42,7 @@
             <div class="card bg-base-100 shadow-md">
               <div class="card-body">
                 <h3 class="card-title">
-                  <a href="/work/<%= p.slug %>"><%= p.title %></a>
+                  <a href="/project/<%= p.slug %>"><%= p.title %></a>
                 </h3>
                 <p class="text-sm opacity-70"><%= p.Category ? p.Category.name : "General" %></p>
                 <p><%= p.summary %></p>
