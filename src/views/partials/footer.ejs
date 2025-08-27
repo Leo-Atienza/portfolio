@@ -3,7 +3,8 @@
     <p>© <%= new Date().getFullYear() %> Leo Atienza — Built with Express, EJS, Tailwind, daisyUI & Sequelize.</p>
     <p>
       <a class="link link-hover"
-         href="https://mail.google.com/mail/u/0/#inbox?compose=GTvVlcSKjRRRZCtXLgqVzwVBXwDMMdFDGpmrwfZzJKjQrrzSJHFPczLwLmMPwCdjgXRDLMfTPkkMQ">
+         href="https://mail.google.com/mail/?view=cm&to=leooatienza@gmail.com"
+         target="_blank" rel="noopener noreferrer">
         leooatienza@gmail.com
       </a>
     </p>
@@ -33,7 +34,7 @@
 
         a.setAttribute('target', '_blank');
         var rel = (a.getAttribute('rel') || '').toLowerCase();
-        ['noreferrer','noopener'].forEach(t => { if (!rel.includes(t)) rel += (rel?' ':'') + t; });
+        ['noreferrer','noopener'].forEach(t => { if (!rel.includes(t)) rel += (rel ? ' ' : '') + t; });
         a.setAttribute('rel', rel.trim());
       });
     } catch (e) {}

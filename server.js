@@ -2,68 +2,114 @@
 require('dotenv').config();
 
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
-const compression = require('compression');
+const helmet = require('helmet');
+const morgan = require('morgan');
+
+// Optional compression (safe if not installed)
+let compression;
+try { compression = require('compression'); } catch { /* noop */ }
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Trust Vercel/Proxy headers (correct scheme/IP on Vercel)
-app.set('trust proxy', 1);
+/* -------- Views (prefer src/views, fallback to views) -------- */
+const SRC_VIEWS = path.join(__dirname, 'src', 'views');
+const ROOT_VIEWS = path.join(__dirname, 'views');
+const VIEWS_DIR = fs.existsSync(SRC_VIEWS) ? SRC_VIEWS : ROOT_VIEWS;
+app.set('views', VIEWS_DIR);
+app.set('view engine', 'ejs');
 
-// Compression for faster responses
-app.use(compression());
+/* -------- Cache-busting token -------- */
+app.locals.assetVersion = Date.now().toString(36);
+app.use((req, res, next) => {
+  res.locals.assetVersion = app.locals.assetVersion;
+  next();
+});
 
-// Parse bodies if/when needed
-app.use(express.urlencoded({ extended: true }));
+/* -------- Core middleware -------- */
+app.disable('x-powered-by');
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// View engine: EJS under /src/views
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'src', 'views'));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        // allow tiny inline helpers used in header/footer partials
+        "script-src": ["'self'", "'unsafe-inline'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:"],
+      },
+    },
+  })
+);
 
-// Static assets (served from /public)
-// You can keep this simple; Tailwind output is /public/css/main.css
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(morgan('dev'));
+if (compression) app.use(compression());
 
-// ---- Cache-busting version for CSS/JS links ----
-// Prefer the deploy SHA on Vercel, then ASSET_VERSION, then a timestamp.
-app.use((req, res, next) => {
-  res.locals.assetVersion =
-    process.env.VERCEL_GIT_COMMIT_SHA ||
-    process.env.ASSET_VERSION ||
-    Date.now();
-  next();
-});
+/* -------- Static files -------- */
+const PUBLIC_DIR = path.join(__dirname, 'public');
+// Serve /public/* directly (good for images, other assets)
+app.use('/public', express.static(PUBLIC_DIR, {
+  maxAge: '1y',
+  etag: false,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-store, must-revalidate');
+  },
+}));
+// Friendly aliases for your links like /css/main.css or /images/*
+app.use('/css', express.static(path.join(PUBLIC_DIR, 'css')));
+app.use('/images', express.static(path.join(PUBLIC_DIR, 'images')));
 
-// Optional: make a site-wide title helper available
-app.use((req, res, next) => {
-  res.locals.title = res.locals.title || '';
-  next();
-});
+/* -------- Health check -------- */
+app.get('/_health', (_req, res) => res.status(200).json({ ok: true, t: Date.now() }));
 
-// Routes
-const siteRoutes = require('./src/routes/site');
-app.use('/', siteRoutes);
+/* -------- Router loader (quiet if missing) -------- */
+function tryRequire(mod) {
+  try { return require(mod); }
+  catch (e) {
+    if (e && (e.code === 'MODULE_NOT_FOUND' || /Cannot find module/.test(e.message))) return null;
+    throw e;
+  }
+}
 
-// 404
+const siteRouter =
+  tryRequire('./src/routes/site') ||
+  tryRequire('./routes/site') ||
+  tryRequire('./site');
+
+if (siteRouter) {
+  app.use('/', siteRouter);
+  console.log('[router] Mounted site router');
+} else {
+  console.warn('[router] No site router found to mount');
+}
+
+/* -------- 404 -------- */
 app.use((req, res) => {
-  res.status(404).render('404', { title: 'Not Found' });
+  res.status(404);
+  try { res.render('404', { title: 'Not Found' }); }
+  catch { res.type('text').send('404 Not Found'); }
 });
 
-// 500
-// eslint-disable-next-line no-unused-vars
+/* -------- 500 -------- */
+/* eslint-disable no-unused-vars */
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).render('500', { title: 'Server Error' });
+  res.status(500);
+  try { res.render('500', { title: 'Server Error', error: err }); }
+  catch { res.type('text').send('500 Server Error\n\n' + (err?.stack || err)); }
 });
+/* eslint-enable no-unused-vars */
 
-// Export for Vercel serverless (api/index.js will import this)
+/* -------- Export / listen -------- */
 module.exports = app;
-
-// Local dev server: `node server.js`
 if (require.main === module) {
-  const PORT = process.env.PORT || 3000;
+  const R = '\x1b[0m', B = '\x1b[1m', G = '\x1b[32m', C = '\x1b[36m';
   app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`\n${B}${G}✔ Server running:${R} ${C}http://localhost:${PORT}${R}\n`);
   });
 }

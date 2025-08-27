@@ -37,6 +37,7 @@
       const saved  = localStorage.getItem('theme') || themes.light;
       root.setAttribute('data-theme', saved);
       icon.textContent = (saved === themes.dark) ? '☀️' : '🌙';
+
       btn?.addEventListener('click', () => {
         const current = root.getAttribute('data-theme') || themes.light;
         const next = (current === themes.dark) ? themes.light : themes.dark;

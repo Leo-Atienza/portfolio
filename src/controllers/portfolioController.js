@@ -1,3 +1,4 @@
+// src/controllers/portfolioController.js
 const { Op } = require('sequelize');
 const { Category, Project } = require('../models');
 
@@ -15,37 +16,20 @@ exports.getHome = async (req, res) => {
   }
 };
 
-exports.getAbout = (req, res) => {
-  res.render('about', { title: 'About' });
-};
-
-exports.getWorks = async (req, res) => {
+exports.getProjects = async (req, res) => {
   try {
-    const categories = await Category.findAll({ order: [['name', 'ASC']] });
-    const selected = (req.query.category || '').trim();
-    const where = {};
-
-    if (selected) {
-      const cat = await Category.findOne({
-        where: { [Op.or]: [{ slug: selected }, { id: Number(selected) || 0 }] },
-      });
-      if (cat) where.categoryId = cat.id;
-    }
-
     const projects = await Project.findAll({
-      where,
-      include: [{ model: Category }],
       order: [['createdAt', 'DESC']],
+      include: [{ model: Category }],
     });
-
-    res.render('projects', { title: 'Projects', categories, projects, selected });
+    res.render('projects', { title: 'Projects', projects, selectedCategory: null });
   } catch (e) {
     console.error(e);
     res.status(500).render('500', { title: 'Server Error' });
   }
 };
 
-exports.getWorkDetail = async (req, res) => {
+exports.getProjectDetail = async (req, res) => {
   try {
     const project = await Project.findOne({
       where: { slug: req.params.slug },
@@ -58,6 +42,8 @@ exports.getWorkDetail = async (req, res) => {
     res.status(500).render('500', { title: 'Server Error' });
   }
 };
+
+exports.getAbout = (req, res) => res.render('about', { title: 'About' });
 
 exports.getContact = (req, res) => {
   const contacts = {
