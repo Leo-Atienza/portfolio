@@ -1,56 +1,69 @@
 // server.js
-'use strict';
-
 require('dotenv').config();
 
 const path = require('path');
 const express = require('express');
-const helmet = require('helmet');
-const morgan = require('morgan');
+const compression = require('compression');
 
 const app = express();
 
-/* ---------- App basics ---------- */
+// Trust Vercel/Proxy headers (correct scheme/IP on Vercel)
 app.set('trust proxy', 1);
+
+// Compression for faster responses
+app.use(compression());
+
+// Parse bodies if/when needed
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// View engine: EJS under /src/views
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src', 'views'));
 
-/* ---------- Middleware ---------- */
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(morgan('dev'));
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+// Static assets (served from /public)
+// You can keep this simple; Tailwind output is /public/css/main.css
 app.use(express.static(path.join(__dirname, 'public')));
 
-/* ---------- View locals (fixes 500 due to missing assetVersion) ---------- */
+// ---- Cache-busting version for CSS/JS links ----
+// Prefer the deploy SHA on Vercel, then ASSET_VERSION, then a timestamp.
 app.use((req, res, next) => {
-  // use a stable version tag if provided, otherwise a cache-busting timestamp
-  res.locals.assetVersion = process.env.ASSET_VERSION || String(Date.now());
+  res.locals.assetVersion =
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    process.env.ASSET_VERSION ||
+    Date.now();
   next();
 });
 
-/* ---------- Health check ---------- */
-app.get('/_health', (req, res) => res.status(200).json({ ok: true }));
+// Optional: make a site-wide title helper available
+app.use((req, res, next) => {
+  res.locals.title = res.locals.title || '';
+  next();
+});
 
-/* ---------- Routes ---------- */
-const siteRoutes = require('./src/routes/site'); // uses /projects and renders static pages with required locals
+// Routes
+const siteRoutes = require('./src/routes/site');
 app.use('/', siteRoutes);
 
-/* ---------- 404 ---------- */
+// 404
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Not Found' });
 });
 
-/* ---------- 500 ---------- */
+// 500
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  console.error(err.stack || err);
+  console.error(err);
   res.status(500).render('500', { title: 'Server Error' });
 });
 
-/* ---------- Start server ---------- */
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
-});
-
+// Export for Vercel serverless (api/index.js will import this)
 module.exports = app;
+
+// Local dev server: `node server.js`
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+}
