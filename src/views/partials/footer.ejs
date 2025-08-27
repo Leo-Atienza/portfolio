@@ -11,7 +11,6 @@
   </aside>
 </footer>
 
-<!-- External links: open safely -->
 <script>
   (function () {
     try {
@@ -22,16 +21,8 @@
         var url;
         try { url = new URL(href, here.origin); } catch { url = null; }
         if (!url) return;
-
-        // Skip internal anchors, mailto, tel, javascript, and internal links
-        if (
-          href.startsWith('#') ||
-          href.startsWith('mailto:') ||
-          href.startsWith('tel:') ||
-          href.startsWith('javascript:') ||
-          url.origin === here.origin
-        ) return;
-
+        if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') ||
+            href.startsWith('javascript:') || url.origin === here.origin) return;
         a.setAttribute('target', '_blank');
         var rel = (a.getAttribute('rel') || '').toLowerCase();
         ['noreferrer','noopener'].forEach(t => { if (!rel.includes(t)) rel += (rel ? ' ' : '') + t; });
@@ -39,10 +30,7 @@
       });
     } catch (e) {}
   })();
-</script>
 
-<!-- Auto-color tech/tool badges (adds classes; never removes) -->
-<script>
   (function () {
     const color = (name) => {
       const n = String(name || '').toLowerCase().trim();

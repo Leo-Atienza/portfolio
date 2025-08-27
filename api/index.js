@@ -1,3 +1,3 @@
-// Vercel serverless entry – forwards all traffic to your Express app.
+// api/index.js — Vercel serverless entry
 const app = require('../server');
 module.exports = (req, res) => app(req, res);

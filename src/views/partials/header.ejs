@@ -23,13 +23,11 @@
       <button id="themeBtn" class="ml-auto btn btn-ghost btn-circle" aria-label="Toggle theme" title="Toggle theme">
         <span id="themeIcon" class="text-2xl leading-none">🌙</span>
       </button>
-      <span class="sr-only text-primary border-b-2 border-current font-semibold"></span>
     </div>
   </div>
 
   <script>
     (function () {
-      // Theme toggle
       const themes = { light: 'cupcake', dark: 'business' };
       const root   = document.documentElement;
       const btn    = document.getElementById('themeBtn');
@@ -46,7 +44,6 @@
         icon.textContent = (next === themes.dark) ? '☀️' : '🌙';
       });
 
-      // Active link
       const here = (location.pathname.replace(/\/+$/, '') || '/');
       document.querySelectorAll('nav a').forEach(a => {
         const href = (a.getAttribute('href') || '#').replace(/\/+$/, '') || '/';
