@@ -1,70 +1,76 @@
-<%- include('partials/header') %>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title><%= (typeof title !== 'undefined' && title) ? `${title} · Leo Atienza` : 'Projects · Leo Atienza' %></title>
 
-<main class="max-w-7xl mx-auto px-4 py-10">
-  <header class="mb-6">
-    <h1 class="text-2xl md:text-3xl font-bold">Projects</h1>
-    <% if (typeof selectedCategory !== 'undefined' && selectedCategory) { %>
-      <p class="opacity-80 mt-1">Category: <span class="font-medium"><%= selectedCategory %></span></p>
-    <% } %>
-  </header>
+  <!-- built CSS with cache-busting, same as index.ejs -->
+  <link rel="stylesheet" href="/css/main.css<% if (typeof assetVersion !== 'undefined') { %>?v=<%= assetVersion %><% } %>">
+</head>
+<body>
+  <%- include('partials/header') %>
 
-  <% if (projects && projects.length) { %>
-    <section class="mt-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <main class="max-w-7xl mx-auto px-4 py-10">
+    <header class="mb-6">
+      <h1 class="text-2xl md:text-3xl font-bold">Projects</h1>
+      <% if (typeof selectedCategory !== 'undefined' && selectedCategory) { %>
+        <p class="opacity-80 mt-1">Category: <span class="font-medium"><%= selectedCategory %></span></p>
+      <% } %>
+    </header>
 
-        <% for (let i = 0; i < projects.length; i++) {
-             const project = projects[i];
-             const mod = i % 3;
+    <% if (projects && projects.length) { %>
+      <section class="mt-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% for (let i = 0; i < projects.length; i++) {
+               const project = projects[i];
+               const mod = i % 3;
+               const soft =
+                 mod === 0 ? 'bg-primary/5 ring-1 ring-primary/20 hover:ring-primary/50'
+               : mod === 1 ? 'bg-secondary/5 ring-1 ring-secondary/20 hover:ring-secondary/50'
+                           : 'bg-accent/5 ring-1 ring-accent/20 hover:ring-accent/50';
+          %>
+            <div class="rounded-2xl shadow-sm hover:shadow-lg transition duration-200 hover:-translate-y-0.5 <%= soft %>">
+              <div class="card bg-transparent rounded-2xl">
+                <div class="card-body space-y-3">
+                  <h3 class="card-title text-base-content/90 text-lg">
+                    <a href="/projects/<%= project.slug %>"><%= project.title %></a>
+                  </h3>
 
-             // EXACTLY the same soft palette used on Home
-             const soft =
-               mod === 0 ? 'bg-primary/5 ring-1 ring-primary/20 hover:ring-primary/50'
-             : mod === 1 ? 'bg-secondary/5 ring-1 ring-secondary/20 hover:ring-secondary/50'
-                         : 'bg-accent/5 ring-1 ring-accent/20 hover:ring-accent/50';
-
-             // Wrapper gets the tint + ring + hover lift
-             const wrapperClass =
-               'rounded-2xl shadow-sm hover:shadow-lg transition duration-200 hover:-translate-y-0.5 ' + soft;
-        %>
-          <div class="<%= wrapperClass %>">
-            <div class="card bg-transparent rounded-2xl">
-              <div class="card-body space-y-3">
-                <h3 class="card-title text-base-content/90 text-lg">
-                  <a href="/projects/<%= project.slug %>"><%= project.title %></a>
-                </h3>
-
-                <% if (project.summary) { %>
-                  <p class="text-sm opacity-80"><%= project.summary %></p>
-                <% } %>
-
-                <div class="flex flex-wrap gap-2">
-                  <% (project.techStack || '').split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
-                    <span class="badge badge-outline"><%= s %></span>
-                  <% }) %>
-                  <% (project.tools || '').split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
-                    <span class="badge badge-ghost"><%= s %></span>
-                  <% }) %>
-                </div>
-
-                <div class="card-actions justify-end">
-                  <% if (project.liveUrl) { %>
-                    <a class="btn btn-sm btn-primary" href="<%= project.liveUrl %>" target="_blank" rel="noopener">Live</a>
+                  <% if (project.summary) { %>
+                    <p class="text-sm opacity-80"><%= project.summary %></p>
                   <% } %>
-                  <% if (project.repoUrl) { %>
-                    <a class="btn btn-sm btn-outline" href="<%= project.repoUrl %>" target="_blank" rel="noopener">Code</a>
-                  <% } %>
-                  <a class="btn btn-sm btn-ghost" href="/projects/<%= project.slug %>">Details</a>
+
+                  <div class="flex flex-wrap gap-2">
+                    <% (project.techStack || '').split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
+                      <span class="badge badge-outline"><%= s %></span>
+                    <% }) %>
+                    <% (project.tools || '').split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
+                      <span class="badge badge-ghost"><%= s %></span>
+                    <% }) %>
+                  </div>
+
+                  <div class="card-actions justify-end">
+                    <% if (project.liveUrl) { %>
+                      <a class="btn btn-sm btn-primary" href="<%= project.liveUrl %>" target="_blank" rel="noopener">Live</a>
+                    <% } %>
+                    <% if (project.repoUrl) { %>
+                      <a class="btn btn-sm btn-outline" href="<%= project.repoUrl %>" target="_blank" rel="noopener">Code</a>
+                    <% } %>
+                    <a class="btn btn-sm btn-ghost" href="/projects/<%= project.slug %>">Details</a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        <% } %>
+          <% } %>
+        </div>
+      </section>
+    <% } else { %>
+      <p class="opacity-70">No projects to display.</p>
+    <% } %>
+  </main>
 
-      </div>
-    </section>
-  <% } else { %>
-    <p class="opacity-70">No projects to display.</p>
-  <% } %>
-</main>
-
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>
+</body>
+</html>
