@@ -14,21 +14,22 @@ try { compression = require('compression'); } catch { /* noop */ }
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/* -------- Views (prefer src/views, fallback to views) -------- */
+/* ---------------- Views (prefer src/views) ---------------- */
 const SRC_VIEWS = path.join(__dirname, 'src', 'views');
 const ROOT_VIEWS = path.join(__dirname, 'views');
 const VIEWS_DIR = fs.existsSync(SRC_VIEWS) ? SRC_VIEWS : ROOT_VIEWS;
+
 app.set('views', VIEWS_DIR);
 app.set('view engine', 'ejs');
 
-/* -------- Cache-busting token -------- */
+/* ---------------- Cache-busting token ---------------- */
 app.locals.assetVersion = Date.now().toString(36);
 app.use((req, res, next) => {
   res.locals.assetVersion = app.locals.assetVersion;
   next();
 });
 
-/* -------- Core middleware -------- */
+/* ---------------- Core middleware ---------------- */
 app.disable('x-powered-by');
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -50,9 +51,10 @@ app.use(
 app.use(morgan('dev'));
 if (compression) app.use(compression());
 
-/* -------- Static files -------- */
+/* ---------------- Static files ---------------- */
 const PUBLIC_DIR = path.join(__dirname, 'public');
-// Serve /public/* directly (good for images, other assets)
+
+// Serve /public/*
 app.use('/public', express.static(PUBLIC_DIR, {
   maxAge: '1y',
   etag: false,
@@ -60,42 +62,65 @@ app.use('/public', express.static(PUBLIC_DIR, {
     if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-store, must-revalidate');
   },
 }));
-// Friendly aliases for your links like /css/main.css or /images/*
+
+// Friendly aliases: /css/* and /images/*
 app.use('/css', express.static(path.join(PUBLIC_DIR, 'css')));
 app.use('/images', express.static(path.join(PUBLIC_DIR, 'images')));
 
-/* -------- Health check -------- */
+/* ---------------- Health check ---------------- */
 app.get('/_health', (_req, res) => res.status(200).json({ ok: true, t: Date.now() }));
 
-/* -------- Router loader (quiet if missing) -------- */
-function tryRequire(mod) {
-  try { return require(mod); }
-  catch (e) {
-    if (e && (e.code === 'MODULE_NOT_FOUND' || /Cannot find module/.test(e.message))) return null;
+/* ---------------- Router loader (EXACT match) ---------------- */
+function tryRequireExact(mod) {
+  try {
+    const r = require(mod);
+    return r;
+  } catch (e) {
+    // Only ignore MODULE_NOT_FOUND if it's for THIS module path
+    const isModuleNotFound = e && e.code === 'MODULE_NOT_FOUND';
+    const mentionsThisModule = typeof e?.message === 'string' && e.message.includes(`'${mod}'`);
+    if (isModuleNotFound && mentionsThisModule) return null;
+
+    // Otherwise, bubble up (helps catch nested errors instead of swallowing them)
     throw e;
   }
 }
 
-const siteRouter =
-  tryRequire('./src/routes/site') ||
-  tryRequire('./routes/site') ||
-  tryRequire('./site');
+let siteRouter = null;
+const candidates = ['./src/routes/site', './routes/site', './site'];
+
+for (const c of candidates) {
+  try {
+    const r = tryRequireExact(c);
+    if (r) {
+      siteRouter = r;
+      console.log(`[router] Found and loaded: ${c}`);
+      break;
+    } else {
+      console.log(`[router] Not found at: ${c}`);
+    }
+  } catch (err) {
+    console.error(`[router] Error while loading ${c}:`, err && err.stack ? err.stack : err);
+    // Stop at first real error so we don't hide problems
+    break;
+  }
+}
 
 if (siteRouter) {
   app.use('/', siteRouter);
   console.log('[router] Mounted site router');
 } else {
-  console.warn('[router] No site router found to mount');
+  console.warn('[router] No site router mounted — check paths or build output');
 }
 
-/* -------- 404 -------- */
+/* ---------------- 404 ---------------- */
 app.use((req, res) => {
   res.status(404);
   try { res.render('404', { title: 'Not Found' }); }
   catch { res.type('text').send('404 Not Found'); }
 });
 
-/* -------- 500 -------- */
+/* ---------------- 500 ---------------- */
 /* eslint-disable no-unused-vars */
 app.use((err, req, res, next) => {
   console.error(err);
@@ -105,8 +130,9 @@ app.use((err, req, res, next) => {
 });
 /* eslint-enable no-unused-vars */
 
-/* -------- Export / listen -------- */
+/* ---------------- Export / listen ---------------- */
 module.exports = app;
+
 if (require.main === module) {
   const R = '\x1b[0m', B = '\x1b[1m', G = '\x1b[32m', C = '\x1b[36m';
   app.listen(PORT, () => {
