@@ -6,47 +6,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="<%= project.summary || 'Project details and links.' %>" />
   <link rel="icon" href="/favicon.ico" />
+
+  <!-- Open Graph / Twitter -->
   <meta property="og:title" content="<%= project.title %> · Leo Atienza" />
   <meta property="og:description" content="<%= project.summary || 'Project details and links.' %>" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- CSS -->
   <link rel="stylesheet" href="/css/main.css<% if (typeof assetVersion !== 'undefined') { %>?v=<%= assetVersion %><% } %>" />
 </head>
 <body>
   <%- include('partials/header') %>
 
-  <main class="container mx-auto px-4 py-10">
+  <main class="max-w-7xl mx-auto px-4 py-10">
     <article class="prose max-w-none">
       <h1 class="mb-2"><%= project.title %></h1>
-      <% if (project.Category) { %><p class="opacity-70"><%= project.Category.name %></p><% } %>
-
-      <% if (project.summary) { %><p><%= project.summary %></p><% } %>
-      <% if (project.description) { %><div><%- project.description %></div><% } %>
-
-      <% if (project.techStack || project.tools) { %>
-        <section class="mb-6">
-          <h2 class="text-xl font-semibold mb-2">Stack & Tools</h2>
-          <div class="flex flex-wrap gap-2">
-            <% if (project.techStack) { %>
-              <% ('' + project.techStack).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
-                <span class="badge badge-neutral tech-badge"><%= s %></span>
-              <% }) %>
-            <% } %>
-            <% if (project.tools) { %>
-              <% ('' + project.tools).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
-                <span class="badge badge-neutral tech-badge"><%= s %></span>
-              <% }) %>
-            <% } %>
-          </div>
-        </section>
+      <% if (project.summary) { %>
+        <p class="opacity-80"><%= project.summary %></p>
       <% } %>
 
-      <div class="flex gap-3">
-        <% if (project.liveUrl) { %>
-          <a class="btn btn-primary" href="<%= project.liveUrl %>" target="_blank" rel="noopener noreferrer">Live</a>
-        <% } %>
-        <% if (project.repoUrl) { %>
-          <a class="btn btn-ghost" href="<%= project.repoUrl %>" target="_blank" rel="noopener noreferrer">Repo</a>
-        <% } %>
+      <!-- Info grid: Tech Stack / Tools / Links -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="rounded-xl bg-base-200/60 border border-base-300 p-4">
+          <p class="text-sm opacity-70">Tech Stack</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <% (project.techStack || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(s=>{ %>
+              <span class="badge badge-outline"><%= s %></span>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-base-200/60 border border-base-300 p-4">
+          <p class="text-sm opacity-70">Tools</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <% (project.tools || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(s=>{ %>
+              <span class="badge badge-ghost"><%= s %></span>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-base-200/60 border border-base-300 p-4">
+          <p class="text-sm opacity-70">Links</p>
+          <div class="mt-2 flex gap-2">
+            <% if (project.liveUrl) { %>
+              <a class="btn btn-sm btn-primary" href="<%= project.liveUrl %>" target="_blank" rel="noopener">Live</a>
+            <% } %>
+            <% if (project.repoUrl) { %>
+              <a class="btn btn-sm btn-outline" href="<%= project.repoUrl %>" target="_blank" rel="noopener">Code</a>
+            <% } %>
+          </div>
+        </div>
       </div>
+
+      <!-- Description -->
+      <% if (project.description) { %>
+        <div class="mt-8">
+          <h2>Description</h2>
+          <p><%= project.description %></p>
+        </div>
+      <% } %>
     </article>
   </main>
 
