@@ -2,12 +2,15 @@
   <aside>
     <p>© <%= new Date().getFullYear() %> Leo Atienza — Built with Express, EJS, Tailwind, daisyUI & Sequelize.</p>
     <p>
-      <a class="link link-hover" href="mailto:leooatienza@gmail.com">leooatienza@gmail.com</a>
+      <a class="link link-hover"
+         href="https://mail.google.com/mail/u/0/#inbox?compose=GTvVlcSKjRRRZCtXLgqVzwVBXwDMMdFDGpmrwfZzJKjQrrzSJHFPczLwLmMPwCdjgXRDLMfTPkkMQ">
+        leooatienza@gmail.com
+      </a>
     </p>
   </aside>
 </footer>
 
-<!-- Enforce off-site link safety: open in new tab + safe rel -->
+<!-- External links: open safely -->
 <script>
   (function () {
     try {
@@ -15,28 +18,54 @@
       var here = window.location;
       links.forEach(function (a) {
         var href = a.getAttribute('href') || '';
+        var url;
+        try { url = new URL(href, here.origin); } catch { url = null; }
+        if (!url) return;
 
-        // Skip internal anchors, mailto, tel, javascript, and root-relative/internal links
+        // Skip internal anchors, mailto, tel, javascript, and internal links
         if (
           href.startsWith('#') ||
           href.startsWith('mailto:') ||
           href.startsWith('tel:') ||
           href.startsWith('javascript:') ||
-          href.startsWith('/') ||
-          href.startsWith(here.origin)
+          url.origin === here.origin
         ) return;
 
-        // External: open safely in new tab
         a.setAttribute('target', '_blank');
-        var existingRel = (a.getAttribute('rel') || '').toLowerCase();
-        var needed = ['noreferrer', 'noopener'];
-        needed.forEach(function (token) {
-          if (!existingRel.includes(token)) existingRel += (existingRel ? ' ' : '') + token;
-        });
-        a.setAttribute('rel', existingRel.trim());
+        var rel = (a.getAttribute('rel') || '').toLowerCase();
+        ['noreferrer','noopener'].forEach(t => { if (!rel.includes(t)) rel += (rel?' ':'') + t; });
+        a.setAttribute('rel', rel.trim());
       });
-    } catch (e) {
-      // no-op
-    }
+    } catch (e) {}
+  })();
+</script>
+
+<!-- Auto-color tech/tool badges (adds classes; never removes) -->
+<script>
+  (function () {
+    const color = (name) => {
+      const n = String(name || '').toLowerCase().trim();
+      if (['javascript','js'].includes(n)) return 'bg-[#F7DF1E] text-black';
+      if (['typescript','ts'].includes(n)) return 'bg-[#3178C6] text-white';
+      if (['node','node.js','nodejs'].includes(n)) return 'bg-[#339933] text-white';
+      if (['express','express.js','expressjs'].includes(n)) return 'bg-black text-white';
+      if (['ejs'].includes(n)) return 'bg-[#A91E50] text-white';
+      if (['react','react.js','reactjs'].includes(n)) return 'bg-[#61DAFB] text-black';
+      if (['html','html5'].includes(n)) return 'bg-[#E44D26] text-white';
+      if (['css','css3'].includes(n)) return 'bg-[#1572B6] text-white';
+      if (['tailwind','tailwindcss'].includes(n)) return 'bg-[#38BDF8] text-black';
+      if (['daisyui','daisy ui'].includes(n)) return 'bg-[#A991F7] text-black';
+      if (['postgres','postgresql'].includes(n)) return 'bg-[#336791] text-white';
+      if (['sequelize'].includes(n)) return 'bg-[#52B0E7] text-black';
+      if (['mongodb','mongo'].includes(n)) return 'bg-[#47A248] text-white';
+      if (['vercel'].includes(n)) return 'bg-black text-white';
+      if (['neon','neon.tech'].includes(n)) return 'bg-[#00E3A2] text-black';
+      return 'badge-ghost';
+    };
+    document.querySelectorAll('.badge, .tech-badge').forEach(el => {
+      const cls = color(el.textContent);
+      cls.split(' ').forEach(c => el.classList.add(c));
+      if (cls.startsWith('bg[')) el.classList.remove('badge-outline');
+    });
   })();
 </script>

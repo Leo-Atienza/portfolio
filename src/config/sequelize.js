@@ -1,16 +1,13 @@
-// src/config/sequelize.js — Vercel/Neon safe
+// src/config/sequelize.js — Neon/Vercel safe
 const { Sequelize } = require('sequelize');
-const pg = require('pg');                // <- force bundle
-require('pg-hstore');                    // <- optional, but safe to include
+const pg = require('pg');
+require('pg-hstore');
 
 const common = {
   dialect: 'postgres',
-  dialectModule: pg,                     // <- tell Sequelize to use this module
+  dialectModule: pg,
   logging: false,
-  dialectOptions: {
-    // Neon requires SSL in serverless; this avoids cert chain issues
-    ssl: { require: true, rejectUnauthorized: false }
-  }
+  dialectOptions: { ssl: { require: true, rejectUnauthorized: false } }
 };
 
 const dbUrl = process.env.DATABASE_URL;

@@ -2,6 +2,5 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  /* any custom styles */
-}
+/* Optional tiny tweaks */
+html, body { min-height: 100%; }

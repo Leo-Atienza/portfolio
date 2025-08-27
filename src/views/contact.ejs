@@ -6,12 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Ways to contact Leo Atienza — email, LinkedIn, GitHub." />
   <link rel="icon" href="/favicon.ico" />
-
-  <!-- Open Graph -->
   <meta property="og:title" content="Contact · Leo Atienza" />
   <meta property="og:description" content="Email, LinkedIn, and GitHub links." />
-
-  <link rel="stylesheet" href="/css/main.css?v=<%= assetVersion %>" />
+  <link rel="stylesheet" href="/css/main.css<% if (typeof assetVersion !== 'undefined') { %>?v=<%= assetVersion %><% } %>" />
 </head>
 <body>
   <%- include('partials/header') %>
@@ -21,18 +18,21 @@
       <h1 class="text-3xl font-bold mb-6">Contact</h1>
 
       <div class="grid gap-6 sm:grid-cols-2">
-        <!-- Email via Gmail Compose (opens in new tab) -->
-        <a class="card bg-base-100 shadow-md hover:shadow-lg transition"
-           href="https://mail.google.com/mail/u/0/#inbox?compose=CllgCJqZhfdlfstgBSGTnkLkWkPrmGpgNgvSVfHGbWzTgrqxxJkFhVWgFpxHLmjNNZKXHGRjQmL"
+        <!-- Email (Gmail compose; lighter red) -->
+        <a class="card text-white hover:brightness-110 transition"
+           style="background-color: rgba(234, 67, 53, 0.85);"
+           href="https://mail.google.com/mail/u/0/#inbox?compose=CllgCJZWPVrJKGnMQxspCXsCcsGZbjqsvSZlMPzVVVtqsHxnBXhQCFvdxnsnLGTPjgQNDtKNrLV"
            target="_blank" rel="noopener noreferrer">
           <div class="card-body">
             <h2 class="card-title">Email</h2>
-            <p>Compose an email to me in Gmail</p>
+            <p>leooatienza@gmail.com</p>
           </div>
         </a>
 
         <% if (contacts && contacts.linkedin) { %>
-          <a class="card bg-base-100 shadow-md hover:shadow-lg transition"
+          <!-- LinkedIn (lighter blue) -->
+          <a class="card text-white hover:brightness-110 transition"
+             style="background-color: rgba(10, 102, 194, 0.85);"
              href="<%= contacts.linkedin %>" target="_blank" rel="noopener noreferrer">
             <div class="card-body">
               <h2 class="card-title">LinkedIn</h2>
@@ -42,11 +42,13 @@
         <% } %>
 
         <% if (contacts && contacts.github) { %>
-          <a class="card bg-base-100 shadow-md hover:shadow-lg transition"
+          <!-- GitHub (lighter black) -->
+          <a class="card text-white hover:brightness-110 transition"
+             style="background-color: rgba(36, 41, 46, 0.88);"
              href="<%= contacts.github %>" target="_blank" rel="noopener noreferrer">
             <div class="card-body">
               <h2 class="card-title">GitHub</h2>
-              <p>See my code and projects</p>
+              <p>Browse my projects and code</p>
             </div>
           </a>
         <% } %>

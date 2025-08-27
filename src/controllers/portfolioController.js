@@ -22,9 +22,9 @@ exports.getAbout = (req, res) => {
 exports.getWorks = async (req, res) => {
   try {
     const categories = await Category.findAll({ order: [['name', 'ASC']] });
-
     const selected = (req.query.category || '').trim();
     const where = {};
+
     if (selected) {
       const cat = await Category.findOne({
         where: { [Op.or]: [{ slug: selected }, { id: Number(selected) || 0 }] },
@@ -68,7 +68,6 @@ exports.getContact = (req, res) => {
   res.render('contact', { title: 'Contact', contacts });
 };
 
-// New pages (empty arrays you can fill later)
 exports.getEducation = (req, res) => res.render('education', { title: 'Education', schools: [] });
 exports.getCertifications = (req, res) => res.render('certifications', { title: 'Certifications', certs: [] });
 exports.getExperience = (req, res) => res.render('experience', { title: 'Experience', roles: [] });

@@ -4,91 +4,84 @@
   <meta charset="utf-8" />
   <title><%= title %> · Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <meta name="description" content="Browse Leo Atienza’s projects — repo, live demo, summary, tech stack, tools, and details." />
   <link rel="icon" href="/favicon.ico" />
-
   <meta property="og:title" content="Projects · Leo Atienza" />
   <meta property="og:description" content="Projects with summaries, tech stacks, tools, and links to GitHub and live demos." />
-
-  <link rel="stylesheet" href="/css/main.css?v=<%= assetVersion %>" />
+  <link rel="stylesheet" href="/css/main.css<% if (typeof assetVersion !== 'undefined') { %>?v=<%= assetVersion %><% } %>" />
 </head>
 <body>
   <%- include('partials/header') %>
 
   <main class="container mx-auto px-4 py-10">
-    <h1 class="text-3xl font-bold mb-6">Projects</h1>
+    <section class="mb-6">
+      <h1 class="text-3xl font-bold mb-4">Projects</h1>
 
-    <!-- Filter (auto-applies on change) -->
-    <form id="projectsFilter" method="get" action="/projects" class="mb-6">
-      <div class="join">
-        <select id="catFilter" class="select select-bordered join-item text-base" name="category">
-          <option value="">All categories</option>
-          <% categories.forEach(c => { %>
-            <option value="<%= c.slug || c.id %>" <%= (selected == (c.slug || c.id)) ? 'selected' : '' %>><%= c.name %></option>
-          <% }) %>
-        </select>
-        <a class="btn join-item text-base" href="/projects">Reset</a>
-      </div>
-    </form>
-
-    <!-- Grid -->
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <% projects.forEach(p => { %>
-        <div class="card bg-base-100 shadow-md hover:shadow-lg transition">
-          <div class="card-body">
-            <h2 class="card-title">
-              <a href="/project/<%= p.slug %>"><%= p.title %></a>
-            </h2>
-
-            <% if (p.summary) { %>
-              <p class="opacity-80"><%= p.summary %></p>
-            <% } %>
-
-            <% if (p.techStack || p.tools) { %>
-              <div class="mt-2 space-x-2">
-                <% if (p.techStack) { %>
-                  <% ('' + p.techStack).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
-                    <span class="badge badge-outline"><%= s %></span>
-                  <% }) %>
-                <% } %>
-                <% if (p.tools) { %>
-                  <% ('' + p.tools).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
-                    <span class="badge"><%= s %></span>
-                  <% }) %>
-                <% } %>
-              </div>
-            <% } %>
-
-            <div class="card-actions justify-start mt-3">
-              <% if (p.liveUrl) { %>
-                <a class="btn btn-primary btn-sm" href="<%= p.liveUrl %>" target="_blank" rel="noopener noreferrer">Live</a>
-              <% } %>
-              <% if (p.repoUrl) { %>
-                <a class="btn btn-ghost btn-sm" href="<%= p.repoUrl %>" target="_blank" rel="noopener noreferrer">Repo</a>
-              <% } %>
-            </div>
-          </div>
+      <!-- Filter + Reset -->
+      <div class="flex items-end gap-3 mb-6">
+        <div>
+          <label class="label"><span class="label-text">Filter by Category</span></label>
+          <select class="select select-bordered w-full max-w-xs" id="categorySelect" name="category">
+            <option value="">All</option>
+            <% if (Array.isArray(categories)) { categories.forEach(c => { %>
+              <option value="<%= c.slug %>" <%= (selected === c.slug || String(selected) === String(c.id)) ? 'selected' : '' %>><%= c.name %></option>
+            <% }) } %>
+          </select>
         </div>
-      <% }) %>
-    </div>
+        <button id="resetFilter" type="button" class="btn btn-ghost">Reset</button>
+      </div>
+
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <% projects.forEach(p => { %>
+          <article class="card bg-base-100 border border-base-300 hover:border-primary/50 transition">
+            <div class="card-body">
+              <h2 class="card-title"><a href="/project/<%= p.slug %>"><%= p.title %></a></h2>
+
+              <% if (p.summary) { %><p class="opacity-80"><%= p.summary %></p><% } %>
+
+              <% if (p.techStack || p.tools) { %>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <% if (p.techStack) { %>
+                    <% ('' + p.techStack).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
+                      <span class="badge badge-neutral tech-badge"><%= s %></span>
+                    <% }) %>
+                  <% } %>
+                  <% if (p.tools) { %>
+                    <% ('' + p.tools).split(',').map(s => s.trim()).filter(Boolean).forEach(s => { %>
+                      <span class="badge badge-neutral tech-badge"><%= s %></span>
+                    <% }) %>
+                  <% } %>
+                </div>
+              <% } %>
+
+              <div class="card-actions justify-start mt-3">
+                <% if (p.liveUrl) { %><a class="btn btn-primary btn-sm" href="<%= p.liveUrl %>" target="_blank" rel="noopener noreferrer">Live</a><% } %>
+                <% if (p.repoUrl) { %><a class="btn btn-ghost btn-sm" href="<%= p.repoUrl %>" target="_blank" rel="noopener noreferrer">Repo</a><% } %>
+              </div>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </section>
   </main>
 
   <script>
     (function () {
-      const sel = document.getElementById('catFilter');
-      if (!sel) return;
-      sel.addEventListener('change', function () {
-        // If "All categories", go to /projects (no query)
-        if (!this.value) {
+      const sel = document.getElementById('categorySelect');
+      const reset = document.getElementById('resetFilter');
+      if (sel) {
+        sel.addEventListener('change', function () {
+          if (!this.value) { window.location.href = '/projects'; return; }
+          const params = new URLSearchParams(window.location.search);
+          params.set('category', this.value);
+          window.location.href = '/projects?' + params.toString();
+        });
+      }
+      if (reset) {
+        reset.addEventListener('click', function () {
           window.location.href = '/projects';
-          return;
-        }
-        // Preserve other query params if present
-        const params = new URLSearchParams(window.location.search);
-        params.set('category', this.value);
-        window.location.href = '/projects?' + params.toString();
-      });
+        });
+      }
     })();
   </script>
 
