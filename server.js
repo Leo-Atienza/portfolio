@@ -1,4 +1,6 @@
-// server.js — Express app for Vercel (static cache, CSP, health)
+// server.js
+'use strict';
+
 require('dotenv').config();
 
 const path = require('path');
@@ -8,73 +10,47 @@ const morgan = require('morgan');
 
 const app = express();
 
-// Paths
-const VIEWS_DIR = path.join(__dirname, 'src', 'views');
-const PUBLIC_DIR = path.join(__dirname, 'public');
-
-// Views + static
-app.set('views', VIEWS_DIR);
+/* ---------- App basics ---------- */
+app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'src', 'views'));
 
-app.use(
-  express.static(PUBLIC_DIR, {
-    maxAge: '1d',
-    etag: true,
-    lastModified: true,
-    setHeaders(res) {
-      res.setHeader('Cache-Control', 'public, max-age=86400');
-    },
-  })
-);
-
-// Asset version for cache-busting
-try {
-  app.locals.assetVersion = require('./package.json').version;
-} catch {
-  app.locals.assetVersion = '1.0.0';
-}
-
-// Security + logs
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        "default-src": ["'self'"],
-        "script-src": ["'self'", "'unsafe-inline'"], // inline scripts in header/footer
-        "style-src": ["'self'", "'unsafe-inline'"],
-        "img-src": ["'self'", "data:"],
-        "connect-src": ["'self'"],
-        "object-src": ["'none'"],
-        "base-uri": ["'self'"],
-        "frame-ancestors": ["'self'"],
-      },
-    },
-  })
-);
+/* ---------- Middleware ---------- */
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(morgan('dev'));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Health
-app.get('/_health', (req, res) => res.type('text').send('ok'));
-
-// Routes
-const siteRoutes = require('./src/routes/site');
-app.use(siteRoutes);
-
-// Errors
-app.use((req, res) => res.status(404).render('404', { title: 'Not Found' }));
-app.use((err, req, res, next) => {
-  console.error('[SERVER ERROR]', err);
-  try {
-    res.status(500).render('500', { title: 'Server Error' });
-  } catch {
-    res.status(500).send('Server Error');
-  }
+/* ---------- View locals (fixes 500 due to missing assetVersion) ---------- */
+app.use((req, res, next) => {
+  // use a stable version tag if provided, otherwise a cache-busting timestamp
+  res.locals.assetVersion = process.env.ASSET_VERSION || String(Date.now());
+  next();
 });
 
-// Export for Vercel; listen locally
+/* ---------- Health check ---------- */
+app.get('/_health', (req, res) => res.status(200).json({ ok: true }));
+
+/* ---------- Routes ---------- */
+const siteRoutes = require('./src/routes/site'); // uses /projects and renders static pages with required locals
+app.use('/', siteRoutes);
+
+/* ---------- 404 ---------- */
+app.use((req, res) => {
+  res.status(404).render('404', { title: 'Not Found' });
+});
+
+/* ---------- 500 ---------- */
+app.use((err, req, res, next) => {
+  console.error(err.stack || err);
+  res.status(500).render('500', { title: 'Server Error' });
+});
+
+/* ---------- Start server ---------- */
 const PORT = process.env.PORT || 3000;
-if (require.main === module) {
-  app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
-}
+app.listen(PORT, () => {
+  console.log(`✅ Server running at http://localhost:${PORT}`);
+});
+
 module.exports = app;

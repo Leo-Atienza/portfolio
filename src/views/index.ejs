@@ -1,76 +1,75 @@
-<!doctype html>
-<html data-theme="cupcake">
-<head>
-  <meta charset="utf-8" />
-  <title><%= title %> · Portfolio</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<%- include('partials/header') %>
 
-  <!-- Basic SEO -->
-  <meta name="description" content="Leo Atienza — portfolio of full-stack projects built with Node.js, Express, EJS, and Postgres. See recent work, tech stack, and write-ups." />
-  <link rel="icon" href="/favicon.ico" />
+<main class="max-w-7xl mx-auto px-4 py-10">
 
-  <!-- Open Graph / Twitter -->
-  <meta property="og:title" content="Leo Atienza · Portfolio" />
-  <meta property="og:description" content="Full-stack projects, case studies, and links to code and live demos." />
+<!-- BIG HERO -->
+<section
+  class="w-full rounded-3xl bg-base-200 border border-base-300 text-center"
+  style="padding: 6rem 3rem;"  
+>
+  <h1
+    class="font-extrabold tracking-tight"
+    style="font-size: clamp(2.5rem, 4vw + 1rem, 3.75rem); line-height: 1.1;"
+  >
+    Hi, I'm Leo <span aria-hidden="true">👋</span>
+  </h1>
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="/css/main.css<% if (typeof assetVersion !== 'undefined') { %>?v=<%= assetVersion %><% } %>" />
-</head>
-<body>
-  <%- include('partials/header') %>
+  <p class="opacity-80" style="max-width: 48rem; margin: 1rem auto 0;">
+    An IT student aspiring to tackle both IT Service Management and Software Engineering.
+  </p>
 
-  <main class="container mx-auto px-4 py-10">
-    <section class="hero min-h-[40vh] bg-base-200 rounded-2xl">
-      <div class="hero-content text-center">
-        <div class="max-w-2xl">
-          <h1 class="text-4xl font-extrabold">Hi, I'm Leo 👋</h1>
-          <p class="py-4 opacity-80">An IT student aspiring to tackle both IT Service Management and Software Engineering.</p>
-          <div class="flex gap-3 justify-center">
-            <a class="btn btn-primary" href="/projects">Projects</a>
-            <a class="btn btn-outline" href="/about">About me</a>
+  <div class="flex items-center justify-center gap-3" style="margin-top: 1.25rem;">
+    <a href="/projects" class="btn btn-primary rounded-full px-6">Projects</a>
+    <a href="/about" class="btn btn-outline rounded-full px-6">About me</a>
+  </div>
+</section>
+
+<!-- EXTRA SPACE under the hero -->
+<div style="height: 64px;"></div>   <!-- change 64px to 48/80/etc to taste -->
+
+<!-- RECENT PROJECTS -->
+<section>
+  <h2 class="text-xl font-semibold mb-4">Recent Projects</h2>
+  <% if (typeof recent !== 'undefined' && recent && recent.length) { %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% recent.forEach(project => { %>
+        <div class="card bg-base-100 rounded-2xl ring-1 ring-base-200/70 hover:ring-primary/60 shadow-sm hover:shadow-lg transition duration-200 hover:-translate-y-0.5">
+          <div class="card-body space-y-3">
+            <h3 class="card-title text-base-content/90 text-lg">
+              <a href="/projects/<%= project.slug %>"><%= project.title %></a>
+            </h3>
+
+            <% if (project.summary) { %>
+              <p class="text-sm opacity-80"><%= project.summary %></p>
+            <% } %>
+
+            <div class="flex flex-wrap gap-2">
+              <% (project.techStack || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(s=>{ %>
+                <span class="badge badge-outline"><%= s %></span>
+              <% }) %>
+              <% (project.tools || '').split(',').map(s=>s.trim()).filter(Boolean).forEach(s=>{ %>
+                <span class="badge badge-ghost"><%= s %></span>
+              <% }) %>
+            </div>
+
+            <div class="card-actions justify-end">
+              <% if (project.liveUrl) { %>
+                <a class="btn btn-sm btn-primary" href="<%= project.liveUrl %>" target="_blank" rel="noopener">Live</a>
+              <% } %>
+              <% if (project.repoUrl) { %>
+                <a class="btn btn-sm btn-outline" href="<%= project.repoUrl %>" target="_blank" rel="noopener">Code</a>
+              <% } %>
+              <a class="btn btn-sm btn-ghost" href="/projects/<%= project.slug %>">Details</a>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p class="opacity-70">No projects yet.</p>
+  <% } %>
+</section>
 
-    <% if (typeof recent !== 'undefined' && Array.isArray(recent) && recent.length) { %>
-      <section class="mt-10">
-        <h2 class="text-2xl font-semibold mb-4">Recent Projects</h2>
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <% recent.forEach(p => { %>
-            <div class="card bg-base-100 border border-base-300 hover:border-primary/50 transition">
-              <div class="card-body">
-                <h3 class="card-title">
-                  <a href="/project/<%= p.slug %>"><%= p.title %></a>
-                </h3>
-                <p class="text-sm opacity-70"><%= p.Category ? p.Category.name : "General" %></p>
-                <p><%= p.summary %></p>
+</main>
 
-                <% const tech = (p.techStack || '').split(',').map(s=>s.trim()).filter(Boolean); %>
-                <% if (tech.length) { %>
-                  <div class="mt-2 flex flex-wrap gap-2">
-                    <% tech.forEach(t => { %>
-                      <span class="badge badge-neutral tech-badge"><%= t %></span>
-                    <% }) %>
-                  </div>
-                <% } %>
-
-                <div class="card-actions justify-start mt-3">
-                  <% if (p.liveUrl) { %>
-                    <a class="btn btn-primary btn-sm" href="<%= p.liveUrl %>" target="_blank" rel="noreferrer noopener">Live</a>
-                  <% } %>
-                  <% if (p.repoUrl) { %>
-                    <a class="btn btn-ghost btn-sm" href="<%= p.repoUrl %>" target="_blank" rel="noreferrer noopener">Repo</a>
-                  <% } %>
-                </div>
-              </div>
-            </div>
-          <% }) %>
-        </div>
-      </section>
-    <% } %>
-  </main>
-
-  <%- include('partials/footer') %>
-</body>
-</html>
+<%- include('partials/footer') %>
