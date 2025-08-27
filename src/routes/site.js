@@ -1,9 +1,7 @@
-// src/routes/site.js
 const express = require('express');
 const router = express.Router();
 const { Project, Category } = require('../models');
 
-/* ---------------------- HOME ---------------------- */
 router.get('/', async (req, res, next) => {
   try {
     const recent = await Project.findAll({
@@ -15,7 +13,6 @@ router.get('/', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-/* -------------------- PROJECTS -------------------- */
 router.get('/projects', async (req, res, next) => {
   try {
     const projects = await Project.findAll({
@@ -37,12 +34,11 @@ router.get('/projects/:slug', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-/* ----------------- STATIC PAGES ------------------- */
-router.get('/about',        (_req, res) => res.render('about', { title: 'About' }));
-router.get('/education',    (_req, res) => res.render('education', { title: 'Education', schools: [] }));
-router.get('/experience',   (_req, res) => res.render('experience', { title: 'Experience', roles: [] }));
+router.get('/about',         (_req, res) => res.render('about', { title: 'About' }));
+router.get('/education',     (_req, res) => res.render('education', { title: 'Education', schools: [] }));
+router.get('/experience',    (_req, res) => res.render('experience', { title: 'Experience', roles: [] }));
 router.get('/certifications',(_req, res) => res.render('certifications', { title: 'Certifications', certs: [] }));
-router.get('/contact',      (_req, res) => {
+router.get('/contact',       (_req, res) => {
   const contacts = {
     email: 'leooatienza@gmail.com',
     linkedin: process.env.LINKEDIN_URL || null,
@@ -51,7 +47,6 @@ router.get('/contact',      (_req, res) => {
   res.render('contact', { title: 'Contact', contacts });
 });
 
-/* -------------- OLD → NEW REDIRECTS --------------- */
 router.get('/works', (_req, res) => res.redirect(301, '/projects'));
 router.get('/work/:slug', (req, res) => res.redirect(301, `/projects/${req.params.slug}`));
 
