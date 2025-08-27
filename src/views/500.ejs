@@ -4,11 +4,9 @@
   <meta charset="utf-8" />
   <title><%= title %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <meta name="description" content="Server error — something went wrong. Please try again later." />
   <link rel="icon" href="/favicon.ico" />
-
-  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/main.css<% if (typeof assetVersion !== 'undefined') { %>?v=<%= assetVersion %><% } %>" />
 </head>
 <body>
   <%- include('partials/header') %>
